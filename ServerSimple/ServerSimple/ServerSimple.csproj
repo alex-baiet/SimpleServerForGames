@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9C3AD776-E399-458E-9ADA-EAB05815499B}</ProjectGuid>
+    <ProjectGuid>{18BFBDF1-C84E-4621-94E7-172450BDDC6B}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ServerTest</RootNamespace>
-    <AssemblyName>ServerTest</AssemblyName>
+    <RootNamespace>ServerSimple</RootNamespace>
+    <AssemblyName>ServerSimple</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,10 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandHandler.cs" />
-    <Compile Include="InputHandler.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="CommandHandler.cs" />
     <Compile Include="ConsoleServer.cs" />
+    <Compile Include="InputHandler.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="PacketManager.cs" />
     <Compile Include="Program.cs" />
