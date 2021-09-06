@@ -5,9 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientSimple {
-    /*class ClientReceive {
+    class ClientReceive {
+        private static Dictionary<int, string> _idNames = new Dictionary<int, string>();
+
         /// <summary>Treat the packet received depending of his content.</summary>
-        public static void HandlePacketReceived(Packet packet) {
+        /// <param name="packet">The packet received.</param>
+        /// <param name="client">The client receiving the packet.</param>
+        public static void HandlePacket(Packet packet, Client client) {
             if (packet.Id == (int)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
             }
@@ -19,8 +23,8 @@ namespace ClientSimple {
                     break;
 
                 case "yourId":
-                    Id = packet.Id;
-                    ConsoleServer.WriteLine($"Your assigned id : {Id}", MessageType.Debug);
+                    client.Id = packet.Id;
+                    ConsoleServer.WriteLine($"Your assigned id : {client.Id}", MessageType.Debug);
                     break;
 
                 case "idName":
@@ -34,23 +38,21 @@ namespace ClientSimple {
                     ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
                     ConsoleServer.WriteLine($"Connected clients' name : {Helper.ArrayToString(_idNames)}", MessageType.Debug);
                     Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
-                    SendPacket(toSend);
+                    client.SendPacket(toSend);
                     break;
 
                 case "ping":
                     toSend = new Packet(SpecialId.Server, "pingReturn");
-                    SendPacket(toSend);
+                    client.SendPacket(toSend);
                     break;
 
                 case "pingReturn":
-                    long res = _stopwatch.ElapsedMilliseconds;
-                    _stopwatch.Stop();
-                    ConsoleServer.WriteLine($"Ping returned in {res}ms.");
+                    client.EndPing();
                     break;
 
                 default:
                     throw new NotImplementedException();
             }
         }
-    }*/
+    }
 }

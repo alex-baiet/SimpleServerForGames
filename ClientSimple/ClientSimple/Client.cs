@@ -9,7 +9,7 @@ namespace ClientSimple {
         public const int BufferSize = 4096;
         public static Client Instance = new Client();
 
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public string Pseudo { get; private set; } = "Guest";
 
         private TcpClient _tcpClient;
@@ -17,10 +17,6 @@ namespace ClientSimple {
         private NetworkStream _stream;
         private PacketManager _packetManager = new PacketManager();
         private Stopwatch _stopwatch = new Stopwatch();
-
-        #region ClientSideOnly
-        private Dictionary<int, string> _idNames = new Dictionary<int, string>();
-        #endregion
 
         #region Connection
         /// <summary>Connect the client to the server.</summary>
@@ -65,6 +61,7 @@ namespace ClientSimple {
         
         public void SendPacket(Packet packet) {
             packet.WriteLength();
+            ConsoleServer.WriteLine($"sent packet \"{packet.Name}\" with length : {packet.Length}", MessageType.Packet);
             _stream.BeginWrite(packet.ToArray(), 0, packet.Length, null, null);
         }
 
@@ -88,9 +85,9 @@ namespace ClientSimple {
                 Packet[] packets = _packetManager.GetPackets(data);
 
                 foreach (Packet packet in packets) {
-                    ConsoleServer.WriteLine($"Receiving packet from the server named \"{packet.Name}\" (size={packet.Length})", MessageType.Debug);
+                    ConsoleServer.WriteLine($"Receiving packet from the server named \"{packet.Name}\" (size={packet.Length})", MessageType.Packet);
 
-                    HandlePacketReceived(packet);
+                    ClientReceive.HandlePacket(packet, this);
                 }
                 if (_tcpClient.Connected) _stream.BeginRead(_receiveBuffer, 0, BufferSize, new AsyncCallback(ReceiveCallback), null);
 
@@ -99,51 +96,11 @@ namespace ClientSimple {
             }
         }
 
-        /// <summary>Treat the packet received depending of his content.</summary>
-        private void HandlePacketReceived(Packet packet) {
-            if (packet.Id == (int)SpecialId.Null) {
-                throw new NotSupportedException("A packet with no target client can't be managed.");
-            }
-
-            switch (packet.Name) {
-                case "msg":
-                    string msg = packet.ReadString();
-                    ConsoleServer.WriteLine(msg);
-                    break;
-
-                case "yourId":
-                    Id = packet.Id;
-                    ConsoleServer.WriteLine($"Your assigned id : {Id}", MessageType.Debug);
-                    break;
-
-                case "idName":
-                    int id = packet.ReadInt();
-                    string idName = packet.ReadString();
-                    if (!_idNames.ContainsKey(id)) _idNames.Add(id, idName);
-                    else _idNames[id] = idName;
-                    break;
-
-                case "allConnectionDataSent": // Connection finished
-                    ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
-                    ConsoleServer.WriteLine($"Connected clients' name : {Helper.ArrayToString(_idNames)}", MessageType.Debug);
-                    Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
-                    SendPacket(toSend);
-                    break;
-
-                case "ping":
-                    toSend = new Packet(SpecialId.Server, "pingReturn");
-                    SendPacket(toSend);
-                    break;
-
-                case "pingReturn":
-                    long res = _stopwatch.ElapsedMilliseconds;
-                    _stopwatch.Stop();
-                    ConsoleServer.WriteLine($"Ping returned in {res}ms.");
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
+        /// <summary>To call after receiving a ping answer.</summary>
+        public void EndPing() {
+            long res = _stopwatch.ElapsedMilliseconds;
+            _stopwatch.Stop();
+            ConsoleServer.WriteLine($"Ping returned in {res}ms.");
         }
         #endregion
     }

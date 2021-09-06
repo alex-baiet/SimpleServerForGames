@@ -10,6 +10,5 @@ namespace ServerSimple {
 
             InputHandler.StartReadLines();
         }
-
     }
 }
