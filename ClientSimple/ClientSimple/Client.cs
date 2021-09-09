@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
+using System.Threading;
 
 namespace ClientSimple {
     class Client {
@@ -69,7 +70,7 @@ namespace ClientSimple {
             if (!_stopwatch.IsRunning) {
                 Packet packet = new Packet(SpecialId.Server, "ping");
                 SendPacket(packet);
-                _stopwatch.Start();
+                _stopwatch.Restart();
             }
         }
         #endregion

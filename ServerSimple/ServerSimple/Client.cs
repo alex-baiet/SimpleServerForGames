@@ -25,6 +25,7 @@ namespace ServerSimple {
 
         /// <summary>Create a connexion to a client.</summary>
         public Client(TcpClient tcpClient, int id) {
+            // Tcp connection
             _tcpClient = tcpClient;
             _stream = _tcpClient.GetStream();
             _receiveBuffer = new byte[BufferSize];
@@ -88,7 +89,6 @@ namespace ServerSimple {
                 Server.RemoveClient(Id);
             }
         }
-
 
         /// <summary>To call after receiving a ping answer.</summary>
         public void EndPing() {

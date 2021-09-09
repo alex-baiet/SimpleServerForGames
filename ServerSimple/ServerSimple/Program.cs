@@ -6,6 +6,7 @@ namespace ServerSimple {
         static void Main(string[] args) {
             Console.Title = "Test Server";
 
+            Test.Start();
             Server.Start();
 
             InputHandler.StartReadLines();

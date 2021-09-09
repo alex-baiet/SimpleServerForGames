@@ -6,12 +6,13 @@ using System.Net.Sockets;
 namespace ServerSimple {
     class Server {
         public const int Port = 26950;
-        public const int MaxClient = 1;
+        public const int MaxClient = 4;
         public const string Name = "Server Test";
 
         public static HashSet<int> ConnectedClientsId { get => new HashSet<int>(_assignedId); }
 
         private static TcpListener _tcpListener;
+        private static IPEndPoint _ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
         private static Client[] _clients = new Client[MaxClient + 1];
         private static int _connectedCount = 0;
         private static HashSet<int> _assignedId = new HashSet<int>();

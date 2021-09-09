@@ -10,6 +10,10 @@ namespace ServerSimple {
 
         public Packet[] GetPackets(byte[] data) {
             List<Packet> packets = new List<Packet>();
+            if (data.Length == 0) {
+                packets.Add(new Packet(SpecialId.Server, "disconnect"));
+                return packets.ToArray();
+            }
 
             int cursor = 0;
             if (_dataPart != null) {

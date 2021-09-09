@@ -8,6 +8,7 @@ namespace ClientSimple {
         static void Main(string[] args) {
             Console.Title ="Test Client";
 
+            Test.Start();
             Connection();
 
             InputHandler.StartReadLines();
