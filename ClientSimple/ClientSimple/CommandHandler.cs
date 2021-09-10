@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClientSimple {
     class CommandHandler {
-        public delegate void Command();
+        public delegate void Command(string[] args);
         public static string[] CommandsList { get => _commands.Keys.ToArray(); }
         
         private static bool _isInitialized = false;
@@ -16,11 +16,24 @@ namespace ClientSimple {
         public static void InitCommand() {
             if (!_isInitialized) {
                 _commands = new Dictionary<string, Command>();
+                Client client = Client.Instance;
 
                 // Here we initialize all default commands.
-                _commands.Add("ping", () => {
+                _commands.Add("msg", (string[] args) => {
+                    if (args.Length < 2) {
+                        ConsoleServer.WriteLine("Missing arguments. The command must be \"msg targetName text\".", MessageType.Error);
+                        return;
+                    }
+                    try {
+                        client.SendMessage(IdHandler.NameToId(args[0]), string.Join(" ", args, 1, args.Length-1));
+                    } catch {
+                        ConsoleServer.WriteLine("Invalid command.", MessageType.Error);
+                    }
+                });
+
+                _commands.Add("ping", (string[] args) => {
                     ConsoleServer.WriteLine($"Ping sent to server...");
-                    Client.Instance.Ping();
+                    client.Ping();
                 });
 
                 ConsoleServer.WriteLine("Commands initialized.", MessageType.Debug);
@@ -34,9 +47,13 @@ namespace ClientSimple {
         /// <returns>True if the command exist.</returns>
         public static bool ExecuteCommand(string command) {
             if (!_isInitialized) InitCommand();
+            
+            string[] words = command.Split(' ');
+            string[] args = new string[words.Length - 1];
+            Array.Copy(words, 1, args, 0, args.Length);
 
-            if (_commands.ContainsKey(command)) {
-                _commands[command]();
+            if (_commands.ContainsKey(words[0])) {
+                _commands[words[0]](args);
                 return true;
             }
 

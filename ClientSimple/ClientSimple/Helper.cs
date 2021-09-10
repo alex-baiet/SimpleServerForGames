@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace ClientSimple {
     class Helper {
         public static string ArrayToString(object[] array) {
+            if (array.Length == 0) return "[]";
+
             string res = "[";
             for (int i = 0; i < array.Length - 1; i++) {
                 res += $"{array[i]}, ";

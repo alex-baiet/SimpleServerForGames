@@ -6,16 +6,16 @@ using System.Net.Sockets;
 namespace ServerSimple {
     class Server {
         public const int Port = 26950;
-        public const int MaxClient = 4;
+        public const ushort MaxClient = 4;
         public const string Name = "Server Test";
 
-        public static HashSet<int> ConnectedClientsId { get => new HashSet<int>(_assignedId); }
+        public static HashSet<ushort> ConnectedClientsId { get => new HashSet<ushort>(_assignedId); }
 
         private static TcpListener _tcpListener;
         private static IPEndPoint _ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
         private static Client[] _clients = new Client[MaxClient + 1];
         private static int _connectedCount = 0;
-        private static HashSet<int> _assignedId = new HashSet<int>();
+        private static HashSet<ushort> _assignedId = new HashSet<ushort>();
 
         public static void Start() {
             ConsoleServer.WriteLine($"Starting server...");
@@ -43,7 +43,7 @@ namespace ServerSimple {
         }
 
         private static void AddClient(TcpClient tcpClient) {
-            for (int i = 1; i <= MaxClient; i++) {
+            for (ushort i = 1; i <= MaxClient; i++) {
                 if (_clients[i] == null) {
                     _clients[i] = new Client(tcpClient, i);
                     _assignedId.Add(i);
@@ -53,30 +53,30 @@ namespace ServerSimple {
             }
         }
 
-        public static void RemoveClient(int id) {
+        public static void RemoveClient(ushort id) {
             _clients[id].Disconnect();
             _clients[id] = null;
             _assignedId.Remove(id);
             _connectedCount--;
         }
 
-        public static Client GetClient(int id) {
+        public static Client GetClient(ushort id) {
             return _clients[id];
         }
 
-        public static void SendMessage(SpecialId id, string msg) { SendMessage((int)id, msg); }
-        public static void SendMessage(int id, string msg) {
-            if (id == (int)SpecialId.Null) {
+        public static void SendMessage(SpecialId id, string msg) { SendMessage((ushort)id, msg); }
+        public static void SendMessage(ushort id, string msg) {
+            if (id == (ushort)SpecialId.Null) {
                 ConsoleServer.WriteLine($"The message \"{msg}\" target no client.", MessageType.Error);
                 return;
             }
-            if (id == (int)SpecialId.Server) {
+            if (id == (ushort)SpecialId.Server) {
                 ConsoleServer.WriteLine(msg);
                 return;
             }
-            if (id == (int)SpecialId.Broadcast) {
-                SendMessage((int)SpecialId.Server, msg);
-                foreach (int clientId in _assignedId) {
+            if (id == (ushort)SpecialId.Broadcast) {
+                SendMessage((ushort)SpecialId.Server, msg);
+                foreach (ushort clientId in _assignedId) {
                     SendMessage(clientId, msg);
                 }
                 return;

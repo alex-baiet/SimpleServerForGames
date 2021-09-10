@@ -8,7 +8,7 @@ namespace ServerSimple {
     class ServerReceive {
         /// <summary>Treat the packet received depending of his content.</summary>
         public static void HandlePacket(Packet packet, Client client) {
-            if (packet.Id == (int)SpecialId.Null) {
+            if (packet.TargetId == (int)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
             }
 
@@ -20,15 +20,8 @@ namespace ServerSimple {
                     toSend = new Packet(client.Id, "yourId");
                     client.SendPacket(toSend);
 
-                    // Sending server name
-                    toSend = new Packet(client.Id, "idName");
-                    toSend.Write((int)SpecialId.Server);
-                    toSend.Write(Server.Name);
-                    client.SendPacket(toSend);
-
-
                     // Sending all clients name
-                    foreach (int idConnected in Server.ConnectedClientsId) {
+                    foreach (ushort idConnected in Server.ConnectedClientsId) {
                         toSend = new Packet(client.Id, "idName");
                         toSend.Write(idConnected);
                         toSend.Write(Server.GetClient(idConnected).Pseudo);
@@ -46,7 +39,7 @@ namespace ServerSimple {
 
                 case "msg":
                     string msg = packet.ReadString();
-                    Server.SendMessage(packet.Id, msg);
+                    Server.SendMessage(packet.TargetId, msg);
                     break;
 
                 case "connected":

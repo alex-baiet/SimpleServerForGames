@@ -10,7 +10,7 @@ namespace ClientSimple {
         public const int BufferSize = 4096;
         public static Client Instance = new Client();
 
-        public int Id { get; set; }
+        public ushort Id { get; set; }
         public string Pseudo { get; private set; } = "Guest";
 
         private TcpClient _tcpClient;
@@ -22,7 +22,11 @@ namespace ClientSimple {
         #region Connection
         /// <summary>Connect the client to the server.</summary>
         /// <returns>True if the connection is a success.</returns>
-        public void Connect(string ip, int port) {
+        /// <param name="ip">The host's ip.</param>
+        /// <param name="port">The host's port.</param>
+        /// <param name="pseudo">Your client's pseudo.</param>
+        public void Connect(string ip, int port, string pseudo) {
+            Pseudo = string.IsNullOrWhiteSpace(pseudo) ? "Guest" : pseudo;
             _tcpClient = new TcpClient();
 
             ConsoleServer.WriteLine($"Starting connexion to {ip}:{port}...");
@@ -51,13 +55,13 @@ namespace ClientSimple {
         #endregion
 
         #region Sending
-        public void SendMessage(SpecialId toClientId, string msg) { SendMessage((int)toClientId, msg); }
-        public void SendMessage(int toClientId, string msg) {
+        public void SendMessage(SpecialId toClientId, string msg) { SendMessage((ushort)toClientId, msg); }
+        public void SendMessage(ushort toClientId, string msg) {
             Packet packet = new Packet(toClientId, "msg");
             packet.Write(ConsoleServer.ToMessageFormat(Pseudo, msg));
             SendPacket(packet);
 
-            ConsoleServer.WriteLine("Message send to server.", MessageType.Debug);
+            ConsoleServer.WriteLine($"Message sent to {IdHandler.IdToName(toClientId)}.", MessageType.Debug);
         }
         
         public void SendPacket(Packet packet) {

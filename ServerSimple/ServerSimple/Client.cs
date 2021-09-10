@@ -8,7 +8,7 @@ namespace ServerSimple {
         public const int BufferSize = 4096;
 
         /// <summary>Client's id. Each client has a different id.</summary>
-        public int Id { get; set; }
+        public ushort Id { get; set; }
         /// <summary>Name of the player connected trought this client.</summary>
         public string Pseudo { get; set; }
 
@@ -19,12 +19,8 @@ namespace ServerSimple {
         private PacketManager _packetManager = new PacketManager();
         private Stopwatch _stopwatch = new Stopwatch();
 
-        #region ServerOnlySide
-        private bool _hasBasicData = false;
-        #endregion
-
         /// <summary>Create a connexion to a client.</summary>
-        public Client(TcpClient tcpClient, int id) {
+        public Client(TcpClient tcpClient, ushort id) {
             // Tcp connection
             _tcpClient = tcpClient;
             _stream = _tcpClient.GetStream();
@@ -51,7 +47,7 @@ namespace ServerSimple {
         }
 
         public void SendPacket(Packet packet) {
-            if (packet.Id != Id) {
+            if (packet.TargetId != Id) {
                 throw new NotSupportedException("The packet's id must correspond to the client's id.");
             }
             packet.WriteLength();

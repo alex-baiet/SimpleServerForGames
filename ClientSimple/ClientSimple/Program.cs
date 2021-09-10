@@ -15,10 +15,12 @@ namespace ClientSimple {
         }
 
         private static void Connection() {
+            ConsoleServer.WriteLine("Write your pseudo : ");
+            string pseudo = ConsoleServer.ReadLine();
             ConsoleServer.WriteLine("Write the host ip adress (127.0.0.1 by default) : ");
             string ip = ConsoleServer.ReadLine();
             if (ip == "") ip = "127.0.0.1";
-            _client.Connect(ip, 26950);
+            _client.Connect(ip, 26950, pseudo);
         }
     }
 }

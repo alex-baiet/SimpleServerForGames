@@ -5,58 +5,65 @@ using System.Text;
 namespace ClientSimple {
     public enum SpecialId {
         Server = 0,
-        Broadcast = -1,
-        Null = -2
+        Broadcast = ushort.MaxValue,
+        Null = ushort.MaxValue-1
     }
 
     public class Packet {
+        #region Variables
         /// <summary>Gets the length of the packet's content.</summary>
         public int Length { get => buffer.Count; }
         /// <summary>Gets the length of the unread data contained in the packet.</summary>
         public int UnreadLength { get => Length - readPos; }
+        /// <summary>The sender's id.</summary>
+        public ushort SenderId { get; private set; } = (int)SpecialId.Null;
         /// <summary>The target client's id.</summary>
-        public int Id { get; private set; } = -2;
+        public ushort TargetId { get; private set; } = (int)SpecialId.Null;
         /// <summary>The name given to the packet.</summary>
-        public string Name { get; private set; } = "";
+        public string Name { get; private set; }
 
         private List<byte> buffer;
         private byte[] readableBuffer;
         private int readPos;
+        #endregion
 
         #region Constructors
         /// <summary>Creates a new empty packet.</summary>
         public Packet() : this(SpecialId.Null) { }
 
         /// <summary>Creates a new packet with a given ID. Used for sending.</summary>
-        public Packet(SpecialId id) : this((int)id) { }
+        public Packet(SpecialId id) : this((ushort)id) { }
 
         /// <summary>Creates a new packet with a given ID. Used for sending.</summary>
-        public Packet(int id) : this(id, "") { }
+        public Packet(ushort id) : this(id, "") { }
 
         /// <summary>Creates a new packet with a given ID and name. Used for sending.</summary>
-        public Packet(SpecialId id, string name) : this((int)id, name) { }
+        public Packet(SpecialId id, string name) : this((ushort)id, name) { }
 
         /// <summary>Creates a new packet with a given ID and name. Used for sending.</summary>
-        public Packet(int id, string name) {
-            buffer = new List<byte>(); // Intitialize buffer
-            readPos = 0; // Set readPos to 0
+        public Packet(ushort id, string name) {
+            buffer = new List<byte>();
+            readPos = 0;
 
-            Id = id;
-            Write(id); // Write packet id to the buffer
-            Write(name);
+            SenderId = Client.Instance.Id;
+            TargetId = id;
             Name = name;
+
+            Write(SenderId);
+            Write(TargetId);
+            Write(Name);
         }
 
         /// <summary>Creates a packet from which data can be read. Used for receiving.</summary>
-        /// <param name="data">The bytes to add to the packet.</param>
         public Packet(byte[] data) {
-            buffer = new List<byte>(); // Intitialize buffer
-            readPos = 0; // Set readPos to 0
+            buffer = new List<byte>();
+            readPos = 0;
 
             SetBytes(data);
 
             ReadInt(); // Read the useless length value from data.
-            Id = ReadInt();
+            SenderId = ReadUshort();
+            TargetId = ReadUshort();
             Name = ReadString();
         }
         #endregion
@@ -101,42 +108,22 @@ namespace ClientSimple {
 
         #region Write Data
         /// <summary>Adds a byte to the packet.</summary>
-        /// <param name="value">The byte to add.</param>
-        public void Write(byte value) {
-            buffer.Add(value);
-        }
+        public void Write(byte value) { buffer.Add(value); }
         /// <summary>Adds an array of bytes to the packet.</summary>
-        /// <param name="value">The byte array to add.</param>
-        public void Write(byte[] value) {
-            buffer.AddRange(value);
-        }
+        public void Write(byte[] value) { buffer.AddRange(value); }
         /// <summary>Adds a short to the packet.</summary>
-        /// <param name="value">The short to add.</param>
-        public void Write(short value) {
-            buffer.AddRange(BitConverter.GetBytes(value));
-        }
+        public void Write(short value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        /// <summary>Adds a short to the packet.</summary>
+        public void Write(ushort value) { buffer.AddRange(BitConverter.GetBytes(value)); }
         /// <summary>Adds an int to the packet.</summary>
-        /// <param name="value">The int to add.</param>
-        public void Write(int value) {
-            buffer.AddRange(BitConverter.GetBytes(value));
-        }
+        public void Write(int value) { buffer.AddRange(BitConverter.GetBytes(value)); }
         /// <summary>Adds a long to the packet.</summary>
-        /// <param name="value">The long to add.</param>
-        public void Write(long value) {
-            buffer.AddRange(BitConverter.GetBytes(value));
-        }
+        public void Write(long value) { buffer.AddRange(BitConverter.GetBytes(value)); }
         /// <summary>Adds a float to the packet.</summary>
-        /// <param name="value">The float to add.</param>
-        public void Write(float value) {
-            buffer.AddRange(BitConverter.GetBytes(value));
-        }
+        public void Write(float value) { buffer.AddRange(BitConverter.GetBytes(value)); }
         /// <summary>Adds a bool to the packet.</summary>
-        /// <param name="value">The bool to add.</param>
-        public void Write(bool value) {
-            buffer.AddRange(BitConverter.GetBytes(value));
-        }
+        public void Write(bool value) { buffer.AddRange(BitConverter.GetBytes(value)); }
         /// <summary>Adds a string to the packet.</summary>
-        /// <param name="value">The string to add.</param>
         public void Write(string value) {
             Write(value.Length); // Add the length of the string to the packet
             buffer.AddRange(Encoding.ASCII.GetBytes(value)); // Add the string itself
@@ -183,6 +170,22 @@ namespace ClientSimple {
             if (buffer.Count > readPos) {
                 // If there are unread bytes
                 short value = BitConverter.ToInt16(readableBuffer, readPos); // Convert the bytes to a short
+                if (moveReadPos) {
+                    // If moveReadPos is true and there are unread bytes
+                    readPos += 2; // Increase readPos by 2
+                }
+                return value; // Return the short
+            } else {
+                throw new Exception("Could not read value of type 'short'!");
+            }
+        }
+
+        /// <summary>Reads a short from the packet.</summary>
+        /// <param name="moveReadPos">Whether or not to move the buffer's read position.</param>
+        public ushort ReadUshort(bool moveReadPos = true) {
+            if (buffer.Count > readPos) {
+                // If there are unread bytes
+                ushort value = BitConverter.ToUInt16(readableBuffer, readPos); // Convert the bytes to a short
                 if (moveReadPos) {
                     // If moveReadPos is true and there are unread bytes
                     readPos += 2; // Increase readPos by 2

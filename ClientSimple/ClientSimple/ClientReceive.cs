@@ -7,13 +7,11 @@ using System.Net.Sockets;
 
 namespace ClientSimple {
     class ClientReceive {
-        private static Dictionary<int, string> _idNames = new Dictionary<int, string>();
-
         /// <summary>Treat the packet received depending of his content.</summary>
         /// <param name="packet">The packet received.</param>
         /// <param name="client">The client receiving the packet.</param>
         public static void HandlePacket(Packet packet, Client client) {
-            if (packet.Id == (int)SpecialId.Null) {
+            if (packet.TargetId == (int)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
             }
 
@@ -24,20 +22,19 @@ namespace ClientSimple {
                     break;
 
                 case "yourId":
-                    client.Id = packet.Id;
+                    client.Id = packet.TargetId;
                     ConsoleServer.WriteLine($"Your assigned id : {client.Id}", MessageType.Debug);
                     break;
 
                 case "idName":
-                    int id = packet.ReadInt();
+                    ushort id = packet.ReadUshort();
                     string idName = packet.ReadString();
-                    if (!_idNames.ContainsKey(id)) _idNames.Add(id, idName);
-                    else _idNames[id] = idName;
+                    IdHandler.AddIdName(id, idName);
+                    ConsoleServer.WriteLine($"{idName} is connected to server with id {id}.", MessageType.Debug);
                     break;
 
                 case "allConnectionDataSent": // Connection finished
                     ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
-                    ConsoleServer.WriteLine($"Connected clients' name : {Helper.ArrayToString(_idNames)}", MessageType.Debug);
                     Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
                     client.SendPacket(toSend);
                     break;
@@ -55,5 +52,6 @@ namespace ClientSimple {
                     throw new NotImplementedException();
             }
         }
+
     }
 }

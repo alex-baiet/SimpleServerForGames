@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace ServerSimple {
     class CommandHandler {
-        public delegate void Command();
-        private static bool _isInitialised = false;
+        public delegate void Command(string[] args);
+        private static bool _isInitialized = false;
         private static Dictionary<string, Command> _commands = null;
 
         /// <summary>Must be called once at the start of the program to use this class.</summary>
         public static void InitCommand() {
-            if (!_isInitialised) {
+            if (!_isInitialized) {
                 _commands = new Dictionary<string, Command>();
 
                 // Here we initialize all default commands.
-                _commands.Add("ping", () => {
+                _commands.Add("ping", (string[] args) => {
                     ConsoleServer.WriteLine($"Ping sent to all clients...");
                     Server.Ping();
                 });
 
-                _isInitialised = true;
+                _isInitialized = true;
             } else {
                 throw new NotSupportedException("Can't initialize commands twice.");
             }
@@ -30,10 +30,14 @@ namespace ServerSimple {
         /// <summary>Execute the named command.</summary>
         /// <returns>True if the command exist.</returns>
         public static bool ExecuteCommand(string command) {
-            if (!_isInitialised) InitCommand();
+            if (!_isInitialized) InitCommand();
 
-            if (_commands.ContainsKey(command)) {
-                _commands[command]();
+            string[] words = command.Split(' ');
+            string[] args = new string[words.Length - 1];
+            Array.Copy(words, 1, args, 0, args.Length);
+
+            if (_commands.ContainsKey(words[0])) {
+                _commands[words[0]](args);
                 return true;
             }
 
@@ -41,7 +45,7 @@ namespace ServerSimple {
         }
 
         public static void AddCommand(string name, Command command) {
-            if (!_isInitialised) InitCommand();
+            if (!_isInitialized) InitCommand();
             if (_commands.ContainsKey(name)) throw new ArgumentException($"The command \"{name}\" already exist.");
             _commands.Add(name, command);
         }

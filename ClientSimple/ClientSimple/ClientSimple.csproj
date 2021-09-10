@@ -48,6 +48,7 @@
     <Compile Include="CommandHandler.cs" />
     <Compile Include="ConsoleServer.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="IdHandler.cs" />
     <Compile Include="InputHandler.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="PacketManager.cs" />

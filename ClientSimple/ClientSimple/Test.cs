@@ -11,7 +11,11 @@ using System.Diagnostics;
 namespace ClientSimple {
     class Test {
         public static void Start() {
-            // No test. :(
+            /*string line = Console.ReadLine();
+            string[] words = line.Split(' ');
+            string[] args = new string[words.Length - 1];
+            Array.Copy(words, 1, args, 0, args.Length);
+            ConsoleServer.WriteLine($"args found : {Helper.ArrayToString(args)}");*/
         }
     }
 }
