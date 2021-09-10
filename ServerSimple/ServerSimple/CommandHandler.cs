@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace ServerSimple {
     class CommandHandler {
-        public delegate void Command(string[] args);
         private static bool _isInitialized = false;
         private static Dictionary<string, Command> _commands = null;
 
@@ -16,10 +15,25 @@ namespace ServerSimple {
                 _commands = new Dictionary<string, Command>();
 
                 // Here we initialize all default commands.
-                _commands.Add("ping", (string[] args) => {
+                Command command;
+                command = new Command("msg", (string[] args) => {
+                    if (args.Length < 2) {
+                        ConsoleServer.WriteLine("Missing arguments. The command must be \"msg targetName text\".", MessageType.Error);
+                        return;
+                    }
+                    try {
+                        Server.SendMessage(IdHandler.NameToId(args[0]), ConsoleServer.ToMessageFormat("Server", string.Join(" ", args, 1, args.Length - 1)));
+                    } catch {
+                        ConsoleServer.WriteLine("Invalid command.", MessageType.Error);
+                    }
+                });
+                _commands.Add(command.Name, command);
+
+                command = new Command("ping", (string[] args) => {
                     ConsoleServer.WriteLine($"Ping sent to all clients...");
                     Server.Ping();
                 });
+                _commands.Add(command.Name, command);
 
                 _isInitialized = true;
             } else {
@@ -37,7 +51,7 @@ namespace ServerSimple {
             Array.Copy(words, 1, args, 0, args.Length);
 
             if (_commands.ContainsKey(words[0])) {
-                _commands[words[0]](args);
+                _commands[words[0]].Execute(args);
                 return true;
             }
 

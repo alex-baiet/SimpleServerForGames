@@ -12,7 +12,6 @@ namespace ServerSimple {
         public static HashSet<ushort> ConnectedClientsId { get => new HashSet<ushort>(_assignedId); }
 
         private static TcpListener _tcpListener;
-        private static IPEndPoint _ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
         private static Client[] _clients = new Client[MaxClient + 1];
         private static int _connectedCount = 0;
         private static HashSet<ushort> _assignedId = new HashSet<ushort>();
@@ -57,6 +56,7 @@ namespace ServerSimple {
             _clients[id].Disconnect();
             _clients[id] = null;
             _assignedId.Remove(id);
+            IdHandler.RemoveIdName(id);
             _connectedCount--;
         }
 
@@ -70,21 +70,21 @@ namespace ServerSimple {
                 ConsoleServer.WriteLine($"The message \"{msg}\" target no client.", MessageType.Error);
                 return;
             }
-            if (id == (ushort)SpecialId.Server) {
-                ConsoleServer.WriteLine(msg);
-                return;
-            }
+            ConsoleServer.WriteLine(msg);
             if (id == (ushort)SpecialId.Broadcast) {
-                SendMessage((ushort)SpecialId.Server, msg);
                 foreach (ushort clientId in _assignedId) {
-                    SendMessage(clientId, msg);
+                    Packet packet = new Packet(clientId, "msg");
+                    packet.Write(msg);
+                    _clients[clientId].SendPacket(packet);
                 }
                 return;
             }
-
-            Packet packet = new Packet(id, "msg");
-            packet.Write(msg);
-            _clients[id].SendPacket(packet);
+            if (id != (ushort)SpecialId.Server) {
+                Packet packet = new Packet(id, "msg");
+                packet.Write(msg);
+                _clients[id].SendPacket(packet);
+                return;
+            }
         }
 
         public static void Ping() {

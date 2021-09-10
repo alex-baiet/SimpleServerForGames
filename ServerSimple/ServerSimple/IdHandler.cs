@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientSimple {
+namespace ServerSimple {
     class IdHandler {
         private static Dictionary<ushort, string> _idNames = new Dictionary<ushort, string>() {
             { (ushort)SpecialId.Broadcast, "everyone" },

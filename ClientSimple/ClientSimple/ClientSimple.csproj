@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Client.cs" />
     <Compile Include="ClientReceive.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="CommandHandler.cs" />
     <Compile Include="ConsoleServer.cs" />
     <Compile Include="Helper.cs" />

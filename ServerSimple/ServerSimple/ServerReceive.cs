@@ -16,6 +16,7 @@ namespace ServerSimple {
             switch (packet.Name) {
                 case "pseudo":
                     client.Pseudo = packet.ReadString();
+                    IdHandler.AddIdName(client.Id, client.Pseudo);
                     // Sending all datas
                     toSend = new Packet(client.Id, "yourId");
                     client.SendPacket(toSend);
