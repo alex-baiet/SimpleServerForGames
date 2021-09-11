@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServerSimple {
     class IdHandler {
+        #region Variables
         private static Dictionary<ushort, string> _idNames = new Dictionary<ushort, string>() {
             { (ushort)SpecialId.Broadcast, "everyone" },
             { (ushort)SpecialId.Server, "server" }
@@ -15,7 +16,9 @@ namespace ServerSimple {
             { "everyone", (ushort)SpecialId.Broadcast },
             { "server", (ushort)SpecialId.Server }
         };
+        #endregion
 
+        #region Functions
         public static bool ClientExist(string name) { return _namesId.ContainsKey(name); }
         public static bool ClientExist(ushort id) { return _idNames.ContainsKey(id); }
 
@@ -33,12 +36,17 @@ namespace ServerSimple {
         }
 
         public static void RemoveIdName(ushort id) {
-            _namesId.Remove(_idNames[id]);
-            _idNames.Remove(id);
+            if (_idNames.ContainsKey(id)) {
+                _namesId.Remove(_idNames[id]);
+                _idNames.Remove(id);
+            }
         }
         public static void RemoveIdName(string name) {
-            _idNames.Remove(_namesId[name]);
-            _namesId.Remove(name);
+            if (_namesId.ContainsKey(name)) {
+                _idNames.Remove(_namesId[name]);
+                _namesId.Remove(name);
+            }
         }
+        #endregion
     }
 }

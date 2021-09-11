@@ -17,6 +17,7 @@ namespace ClientSimple {
             Client client = Client.Instance;
             while (true) {
                 string input = ConsoleServer.ReadLine();
+                if (!client.Connected) return;
 
                 if (input == "") continue;
                 if (input.StartsWith("/")) {

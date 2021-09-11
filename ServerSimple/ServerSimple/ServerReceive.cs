@@ -16,22 +16,26 @@ namespace ServerSimple {
             switch (packet.Name) {
                 case "pseudo":
                     client.Pseudo = packet.ReadString();
-                    IdHandler.AddIdName(client.Id, client.Pseudo);
-                    // Sending all datas
-                    toSend = new Packet(client.Id, "yourId");
-                    client.SendPacket(toSend);
+                    if (!IdHandler.AddIdName(client.Id, client.Pseudo)) { // A client with the same name already exist
+                        ConsoleServer.WriteLine($"Connection of {client.Pseudo} failed : another client with the same name already exist.");
+                        Server.RemoveClient(client.Id, "Another client with the same name already exist.");
+                    } else {
+                        // Sending all datas
+                        toSend = new Packet(client.Id, "yourId");
+                        client.SendPacket(toSend);
 
-                    // Sending all clients name
-                    foreach (ushort idConnected in Server.ConnectedClientsId) {
-                        toSend = new Packet(client.Id, "idName");
-                        toSend.Write(idConnected);
-                        toSend.Write(Server.GetClient(idConnected).Pseudo);
+                        // Sending all clients name
+                        foreach (ushort idConnected in Server.ConnectedClientsId) {
+                            toSend = new Packet(client.Id, "idName");
+                            toSend.Write(idConnected);
+                            toSend.Write(Server.GetClient(idConnected).Pseudo);
+                            client.SendPacket(toSend);
+                        }
+
+                        // Packet meaning all data has been sent.
+                        toSend = new Packet(client.Id, "allConnectionDataSent");
                         client.SendPacket(toSend);
                     }
-
-                    // Packet meaning all data has been sent.
-                    toSend = new Packet(client.Id, "allConnectionDataSent");
-                    client.SendPacket(toSend);
                     break;
 
                 case "allConnectionDataReceived":
@@ -49,7 +53,7 @@ namespace ServerSimple {
 
                 case "disconnect":
                     ConsoleServer.WriteLine($"{client.Pseudo} disconnected.");
-                    Server.RemoveClient(client.Id);
+                    Server.RemoveClient(client.Id, "Well it's you who disconnected but if you see this this is not normal :(");
                     break;
 
                 case "ping":

@@ -31,7 +31,7 @@ namespace ServerSimple {
         public static void Stop() {
             HashSet<ushort> copy = new HashSet<ushort>(_assignedId);
             foreach (ushort id in copy) {
-                RemoveClient(id);
+                RemoveClient(id, "The server closed.");
             }
             _tcpListener.Stop();
             IsOpen = false;
@@ -39,17 +39,22 @@ namespace ServerSimple {
 
         private static void ConnectCallback(IAsyncResult res) {
             try {
-                if (_connectedCount == MaxClient) {
-                    // Canceling connection.
-                    ConsoleServer.WriteLine("Connection refused : Server is already full !", MessageType.Warning);
-                    return;
-                }
-
                 TcpClient tcpClient = _tcpListener.EndAcceptTcpClient(res);
                 ConsoleServer.WriteLine("Incoming connection...", MessageType.Debug);
-                if (tcpClient.Client.Connected) ConsoleServer.WriteLine($"Connected to {tcpClient.Client.RemoteEndPoint}.", MessageType.Debug);
 
-                AddClient(tcpClient);
+                if (_connectedCount == MaxClient) {
+                    // Canceling connection.
+                    Client client = new Client(tcpClient, (ushort)SpecialId.Null);
+                    Packet packet = new Packet(client.Id, "disconnect");
+                    packet.Write("Server is already full !");
+                    client.SendPacket(packet);
+                    client.Disconnect();
+                    ConsoleServer.WriteLine("Connection refused : Server is already full !", MessageType.Debug);
+                } else {
+                    if (tcpClient.Client.Connected) ConsoleServer.WriteLine($"Connected to {tcpClient.Client.RemoteEndPoint}.", MessageType.Debug);
+                    AddClient(tcpClient);
+                }
+
                 _tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectCallback), null);
             } catch (ObjectDisposedException) { }
         }
@@ -57,7 +62,7 @@ namespace ServerSimple {
         private static void AddClient(TcpClient tcpClient) {
             OpenCheck();
             for (ushort i = 1; i <= MaxClient; i++) {
-            if (_clients[i] == null) {
+                if (_clients[i] == null) {
                     _clients[i] = new Client(tcpClient, i);
                     _assignedId.Add(i);
                     _connectedCount++;
@@ -66,9 +71,15 @@ namespace ServerSimple {
             }
         }
 
-        public static void RemoveClient(ushort id) {
+        public static void RemoveClient(ushort id, string msg) {
             OpenCheck();
-            _clients[id].Disconnect();
+            Client client = _clients[id];
+
+            Packet packet = new Packet(client.Id, "disconnect");
+            packet.Write(msg);
+            client.SendPacket(packet);
+            client.Disconnect();
+
             _clients[id] = null;
             _assignedId.Remove(id);
             IdHandler.RemoveIdName(id);

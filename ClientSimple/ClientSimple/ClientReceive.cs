@@ -11,9 +11,9 @@ namespace ClientSimple {
         /// <param name="packet">The packet received.</param>
         /// <param name="client">The client receiving the packet.</param>
         public static void HandlePacket(Packet packet, Client client) {
-            if (packet.TargetId == (ushort)SpecialId.Null) {
+            /*if (packet.TargetId == (ushort)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
-            }
+            }*/
 
             switch (packet.Name) {
                 case "allConnectionDataSent": // Connection finished
@@ -22,14 +22,9 @@ namespace ClientSimple {
                     client.SendPacket(toSend);
                     break;
 
-                case "disconnected": // Server closed
-                    ConsoleServer.WriteLine($"The server stopped. Wait to server to restart before connecting againg.");
-                    client.Disconnect();
-                    break;
-
-                case "connectionFailed":
-                    string error = packet.ReadString();
-                    ConsoleServer.WriteLine($"Connection to server failed : {error}");
+                case "disconnect": // Server closed
+                    string errorMsg = packet.ReadString();
+                    ConsoleServer.WriteLine($"Connection to server failed : {errorMsg}", MessageType.Error);
                     client.Disconnect();
                     break;
 

@@ -35,7 +35,6 @@ namespace ServerSimple {
         /// <summary></summary>
         /// <remarks>Must close the host point before closing the server's client.</remarks>
         public void Disconnect() {
-            SendPacket(new Packet(Id, "disconnected"));
             _tcpClient.Close();
         }
         #endregion
@@ -50,6 +49,7 @@ namespace ServerSimple {
         }
 
         public void SendPacket(Packet packet) {
+            if (!_tcpClient.Connected) return;
             if (packet.TargetId != Id) {
                 throw new NotSupportedException("The packet's id must correspond to the client's id.");
             }
@@ -85,7 +85,7 @@ namespace ServerSimple {
                 if (_tcpClient.Connected) _stream.BeginRead(_receiveBuffer, 0, BufferSize, new AsyncCallback(ReceiveCallback), null);
             } catch (System.IO.IOException) {
                 ConsoleServer.WriteLine($"{Pseudo} lost connection.", MessageType.Error);
-                Server.RemoveClient(Id);
+                Server.RemoveClient(Id, "Lost connection.");
             } catch (System.ObjectDisposedException) { }
         }
 

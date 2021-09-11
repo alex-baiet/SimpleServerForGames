@@ -12,6 +12,7 @@ namespace ClientSimple {
 
         public ushort Id { get; set; }
         public string Pseudo { get; private set; } = "Guest";
+        public bool Connected { get; private set; } = false;
 
         private TcpClient _tcpClient;
         private byte[] _receiveBuffer = new byte[BufferSize];
@@ -35,6 +36,7 @@ namespace ClientSimple {
 
         public void Disconnect() {
             _tcpClient.Close();
+            Connected = false;
         }
 
         private void ConnectCallback(IAsyncResult res) {
@@ -48,6 +50,7 @@ namespace ClientSimple {
                 Packet packet = new Packet(SpecialId.Server, "pseudo");
                 packet.Write(Pseudo);
                 SendPacket(packet);
+                Connected = true;
             } else {
                 ConsoleServer.WriteLine("Connection to server failed.", MessageType.Error);
             }
@@ -65,9 +68,11 @@ namespace ClientSimple {
         }
         
         public void SendPacket(Packet packet) {
-            packet.WriteLength();
-            ConsoleServer.WriteLine($"sent packet \"{packet.Name}\" with length : {packet.Length}", MessageType.Packet);
-            _stream.BeginWrite(packet.ToArray(), 0, packet.Length, null, null);
+            try {
+                packet.WriteLength();
+                ConsoleServer.WriteLine($"sent packet \"{packet.Name}\" with length : {packet.Length}", MessageType.Packet);
+                _stream.BeginWrite(packet.ToArray(), 0, packet.Length, null, null);
+            } catch (ObjectDisposedException) { }
         }
 
         public void Ping() {
@@ -98,6 +103,7 @@ namespace ClientSimple {
 
             } catch (System.IO.IOException) {
                 ConsoleServer.WriteLine($"Lost connection to server.", MessageType.Error);
+                Disconnect();
             } catch (ObjectDisposedException) { }
         }
 
