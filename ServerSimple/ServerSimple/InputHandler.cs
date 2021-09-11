@@ -16,14 +16,9 @@ namespace ServerSimple {
         private static void ReadLines() {
             while (true) {
                 string input = ConsoleServer.ReadLine();
+                if (!Server.IsOpen) return;
 
                 if (input == "") continue;
-                /*if (input == "exit") {
-                    // Disconnecting
-                    client.Disconnect();
-                    Environment.Exit(0);
-                    continue;
-                }*/
                 if (input.StartsWith("/")) {
                     string command = input.Substring(1, input.Length - 1);
                     if (!CommandHandler.ExecuteCommand(command)) {

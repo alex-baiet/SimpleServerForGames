@@ -98,7 +98,7 @@ namespace ClientSimple {
 
             } catch (System.IO.IOException) {
                 ConsoleServer.WriteLine($"Lost connection to server.", MessageType.Error);
-            }
+            } catch (ObjectDisposedException) { }
         }
 
         /// <summary>To call after receiving a ping answer.</summary>

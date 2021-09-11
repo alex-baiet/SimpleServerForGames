@@ -10,6 +10,7 @@ namespace ServerSimple {
         public const string Name = "Server Test";
 
         public static HashSet<ushort> ConnectedClientsId { get => new HashSet<ushort>(_assignedId); }
+        public static bool IsOpen { get; private set; } = false;
 
         private static TcpListener _tcpListener;
         private static Client[] _clients = new Client[MaxClient + 1];
@@ -22,28 +23,41 @@ namespace ServerSimple {
             _tcpListener = new TcpListener(IPAddress.Any, Port);
             _tcpListener.Start();
             _tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectCallback), null);
+            IsOpen = true;
 
             ConsoleServer.WriteLine($"Server started on port {Port} !", MessageType.Success);
         }
 
-        private static void ConnectCallback(IAsyncResult res) {
-            ConsoleServer.WriteLine("Incoming connection...", MessageType.Debug);
-            if (_connectedCount == MaxClient) {
-                // Canceling connection.
-                ConsoleServer.WriteLine("Connection refused : Server is already full !", MessageType.Warning);
-                return;
+        public static void Stop() {
+            HashSet<ushort> copy = new HashSet<ushort>(_assignedId);
+            foreach (ushort id in copy) {
+                RemoveClient(id);
             }
+            _tcpListener.Stop();
+            IsOpen = false;
+        }
 
-            TcpClient tcpClient = _tcpListener.EndAcceptTcpClient(res);
-            if (tcpClient.Client.Connected) ConsoleServer.WriteLine($"Connected to {tcpClient.Client.RemoteEndPoint}.", MessageType.Debug);
+        private static void ConnectCallback(IAsyncResult res) {
+            try {
+                if (_connectedCount == MaxClient) {
+                    // Canceling connection.
+                    ConsoleServer.WriteLine("Connection refused : Server is already full !", MessageType.Warning);
+                    return;
+                }
 
-            AddClient(tcpClient);
-            _tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectCallback), null);
+                TcpClient tcpClient = _tcpListener.EndAcceptTcpClient(res);
+                ConsoleServer.WriteLine("Incoming connection...", MessageType.Debug);
+                if (tcpClient.Client.Connected) ConsoleServer.WriteLine($"Connected to {tcpClient.Client.RemoteEndPoint}.", MessageType.Debug);
+
+                AddClient(tcpClient);
+                _tcpListener.BeginAcceptTcpClient(new AsyncCallback(ConnectCallback), null);
+            } catch (ObjectDisposedException) { }
         }
 
         private static void AddClient(TcpClient tcpClient) {
+            OpenCheck();
             for (ushort i = 1; i <= MaxClient; i++) {
-                if (_clients[i] == null) {
+            if (_clients[i] == null) {
                     _clients[i] = new Client(tcpClient, i);
                     _assignedId.Add(i);
                     _connectedCount++;
@@ -53,6 +67,7 @@ namespace ServerSimple {
         }
 
         public static void RemoveClient(ushort id) {
+            OpenCheck();
             _clients[id].Disconnect();
             _clients[id] = null;
             _assignedId.Remove(id);
@@ -66,6 +81,7 @@ namespace ServerSimple {
 
         public static void SendMessage(SpecialId id, string msg) { SendMessage((ushort)id, msg); }
         public static void SendMessage(ushort id, string msg) {
+            OpenCheck();
             if (id == (ushort)SpecialId.Null) {
                 ConsoleServer.WriteLine($"The message \"{msg}\" target no client.", MessageType.Error);
                 return;
@@ -88,9 +104,14 @@ namespace ServerSimple {
         }
 
         public static void Ping() {
+            OpenCheck();
             foreach (int id in _assignedId) {
                 _clients[id].Ping();
             }
+        }
+
+        private static void OpenCheck() {
+            if (!IsOpen) throw new NotSupportedException("The server must be open.");
         }
     }
 }

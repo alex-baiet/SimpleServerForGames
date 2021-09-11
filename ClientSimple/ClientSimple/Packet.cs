@@ -25,6 +25,7 @@ namespace ClientSimple {
         private List<byte> buffer;
         private byte[] readableBuffer;
         private int readPos;
+        private bool _lengthWrote = false;
         #endregion
 
         #region Constructors
@@ -55,16 +56,24 @@ namespace ClientSimple {
         }
 
         /// <summary>Creates a packet from which data can be read. Used for receiving.</summary>
+        /// <param name="data">The bytes to add to the packet.</param>
         public Packet(byte[] data) {
-            buffer = new List<byte>();
-            readPos = 0;
+            buffer = new List<byte>(); // Intitialize buffer
+            readPos = 0; // Set readPos to 0
 
-            SetBytes(data);
+            if (data.Length > 0) {
+                SetBytes(data);
 
-            ReadInt(); // Read the useless length value from data.
-            SenderId = ReadUshort();
-            TargetId = ReadUshort();
-            Name = ReadString();
+                ReadInt(); // Read the useless length value from data.
+                SenderId = ReadUshort();
+                TargetId = ReadUshort();
+                Name = ReadString();
+            } else {
+                // It's a packet of disconnection.
+                TargetId = (int)SpecialId.Server;
+                Name = "disconnect";
+            }
+            _lengthWrote = true;
         }
         #endregion
 
@@ -78,7 +87,10 @@ namespace ClientSimple {
 
         /// <summary>Inserts the length of the packet's content at the start of the buffer.</summary>
         public void WriteLength() {
-            buffer.InsertRange(0, BitConverter.GetBytes(buffer.Count)); // Insert the byte length of the packet at the very beginning
+            if (!_lengthWrote) {
+                buffer.InsertRange(0, BitConverter.GetBytes(buffer.Count)); // Insert the byte length of the packet at the very beginning
+                _lengthWrote = true;
+            }
         }
 
         /// <summary>Inserts the given int at the start of the buffer.</summary>

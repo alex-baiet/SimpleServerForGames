@@ -32,7 +32,10 @@ namespace ServerSimple {
         }
 
         #region Connection
+        /// <summary></summary>
+        /// <remarks>Must close the host point before closing the server's client.</remarks>
         public void Disconnect() {
+            SendPacket(new Packet(Id, "disconnected"));
             _tcpClient.Close();
         }
         #endregion
@@ -83,7 +86,7 @@ namespace ServerSimple {
             } catch (System.IO.IOException) {
                 ConsoleServer.WriteLine($"{Pseudo} lost connection.", MessageType.Error);
                 Server.RemoveClient(Id);
-            }
+            } catch (System.ObjectDisposedException) { }
         }
 
         /// <summary>To call after receiving a ping answer.</summary>

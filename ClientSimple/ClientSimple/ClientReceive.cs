@@ -11,19 +11,26 @@ namespace ClientSimple {
         /// <param name="packet">The packet received.</param>
         /// <param name="client">The client receiving the packet.</param>
         public static void HandlePacket(Packet packet, Client client) {
-            if (packet.TargetId == (int)SpecialId.Null) {
+            if (packet.TargetId == (ushort)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
             }
 
             switch (packet.Name) {
-                case "msg":
-                    string msg = packet.ReadString();
-                    ConsoleServer.WriteLine(msg);
+                case "allConnectionDataSent": // Connection finished
+                    ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
+                    Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
+                    client.SendPacket(toSend);
                     break;
 
-                case "yourId":
-                    client.Id = packet.TargetId;
-                    ConsoleServer.WriteLine($"Your assigned id : {client.Id}", MessageType.Debug);
+                case "disconnected": // Server closed
+                    ConsoleServer.WriteLine($"The server stopped. Wait to server to restart before connecting againg.");
+                    client.Disconnect();
+                    break;
+
+                case "connectionFailed":
+                    string error = packet.ReadString();
+                    ConsoleServer.WriteLine($"Connection to server failed : {error}");
+                    client.Disconnect();
                     break;
 
                 case "idName":
@@ -33,10 +40,9 @@ namespace ClientSimple {
                     ConsoleServer.WriteLine($"{idName} is connected to server with id {id}.", MessageType.Debug);
                     break;
 
-                case "allConnectionDataSent": // Connection finished
-                    ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
-                    Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
-                    client.SendPacket(toSend);
+                case "msg":
+                    string msg = packet.ReadString();
+                    ConsoleServer.WriteLine(msg);
                     break;
 
                 case "ping":
@@ -46,6 +52,11 @@ namespace ClientSimple {
 
                 case "pingReturn":
                     client.EndPing();
+                    break;
+
+                case "yourId":
+                    client.Id = packet.TargetId;
+                    ConsoleServer.WriteLine($"Your assigned id : {client.Id}", MessageType.Debug);
                     break;
 
                 default:

@@ -8,7 +8,7 @@ namespace ServerSimple {
     class ServerReceive {
         /// <summary>Treat the packet received depending of his content.</summary>
         public static void HandlePacket(Packet packet, Client client) {
-            if (packet.TargetId == (int)SpecialId.Null) {
+            if (packet.TargetId == (ushort)SpecialId.Null) {
                 throw new NotSupportedException("A packet with no target client can't be managed.");
             }
 

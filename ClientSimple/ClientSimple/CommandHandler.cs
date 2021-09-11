@@ -19,6 +19,17 @@ namespace ClientSimple {
                 
                 // Here we initialize all default commands.
                 Command command;
+
+                command = new Command("exit", (string[] args) => {
+                    if (args.Length > 2) {
+                        ConsoleServer.WriteLine("Too much arguments. \"exit\" has no arguments.", MessageType.Error);
+                        return;
+                    }
+                    ConsoleServer.WriteLine($"Disconnected from server.", MessageType.Success);
+                    client.Disconnect();
+                });
+                _commands.Add(command.Name, command);
+
                 command = new Command("msg", (string[] args) => {
                     if (args.Length < 2) {
                         ConsoleServer.WriteLine("Missing arguments. The command must be \"msg targetName text\".", MessageType.Error);

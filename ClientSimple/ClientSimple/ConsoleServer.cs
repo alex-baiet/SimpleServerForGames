@@ -18,7 +18,7 @@ namespace ClientSimple {
         private const string ReadPrefix = "> ";
 
         public static bool Debug { get; set; } = true;
-        public static bool ListenPacket { get; set; } = false;
+        public static bool ListenPacket { get; set; } = true;
 
         private static bool _isReadingLine = false;
 

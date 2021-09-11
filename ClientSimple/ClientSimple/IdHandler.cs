@@ -22,9 +22,14 @@ namespace ClientSimple {
         public static string IdToName(ushort id) { return _idNames[id]; }
         public static ushort NameToId(string name) { return _namesId[name]; }
 
-        public static void AddIdName(ushort id, string name) {
+        /// <summary>Add a pair of id and name, and return false if a client with similar name already exist.</summary>
+        /// <remarks>If the id is already defined, it will throw an <see cref="ArgumentException"/> instead of a bool.</remarks>
+        public static bool AddIdName(ushort id, string name) {
+            if (_idNames.ContainsKey(id)) throw new ArgumentException($"Already contains a client with id {id}");
+            if (_namesId.ContainsKey(name)) return false;
             _idNames.Add(id, name);
             _namesId.Add(name, id);
+            return true;
         }
 
         public static void RemoveIdName(ushort id) {
