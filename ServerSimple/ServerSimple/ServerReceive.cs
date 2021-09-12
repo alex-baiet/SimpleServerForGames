@@ -14,37 +14,43 @@ namespace ServerSimple {
 
             Packet toSend;
             switch (packet.Name) {
-                case "pseudo":
+                case "pseudo": // Connection of the client with his pseudo
                     client.Pseudo = packet.ReadString();
                     if (!IdHandler.AddIdName(client.Id, client.Pseudo)) { // A client with the same name already exist
                         ConsoleServer.WriteLine($"Connection of {client.Pseudo} failed : another client with the same name already exist.");
                         Server.RemoveClient(client.Id, "Another client with the same name already exist.");
-                    } else {
-                        // Sending all datas
-                        toSend = new Packet(client.Id, "yourId");
-                        client.SendPacket(toSend);
+                        break;
+                    }
+                    // Sending all datas
+                    toSend = new Packet(client.Id, "yourId");
+                    client.SendPacket(toSend);
 
-                        // Sending all clients name
-                        foreach (ushort idConnected in Server.ConnectedClientsId) {
-                            toSend = new Packet(client.Id, "idName");
-                            toSend.Write(idConnected);
-                            toSend.Write(Server.GetClient(idConnected).Pseudo);
-                            client.SendPacket(toSend);
-                        }
-
-                        // Packet meaning all data has been sent.
-                        toSend = new Packet(client.Id, "allConnectionDataSent");
+                    // Sending all clients name
+                    foreach (ushort idConnected in Server.ConnectedClientsId) {
+                        if (idConnected == client.Id) continue;
+                        toSend = new Packet(client.Id, "idName");
+                        toSend.Write(idConnected);
+                        toSend.Write(Server.GetClient(idConnected).Pseudo);
                         client.SendPacket(toSend);
                     }
+
+                    // Packet meaning all data has been sent.
+                    toSend = new Packet(client.Id, "allConnectionDataSent");
+                    client.SendPacket(toSend);
                     break;
 
                 case "allConnectionDataReceived":
-                    ConsoleServer.WriteLine($"{client.Pseudo} join the server.");
+                    toSend = new Packet(SpecialId.Broadcast, "idName");
+                    toSend.Write(client.Id);
+                    toSend.Write(client.Pseudo);
+                    Server.SendPacket(SpecialId.Broadcast, toSend);
+                    Server.SendMessage(SpecialId.Broadcast, $"{client.Pseudo} join the server.");
                     break;
 
                 case "msg":
                     string msg = packet.ReadString();
-                    Server.SendMessage(packet.TargetId, msg);
+                    if (packet.TargetId == (ushort)SpecialId.Broadcast) Server.SendMessage(packet.TargetId, msg);
+                    else Server.SendMessage(new ushort[] { packet.TargetId, packet.SenderId }, msg);
                     break;
 
                 case "connected":
@@ -59,6 +65,9 @@ namespace ServerSimple {
                 case "ping":
                     toSend = new Packet(client.Id, "pingReturn");
                     client.SendPacket(toSend);
+                    if (packet.TargetId != (ushort)SpecialId.Server) {
+                        Server.SendPacket(packet.TargetId, packet);
+                    }
                     break;
 
                 case "pingReturn":

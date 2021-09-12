@@ -91,27 +91,46 @@ namespace ServerSimple {
         }
 
         public static void SendMessage(SpecialId id, string msg) { SendMessage((ushort)id, msg); }
-        public static void SendMessage(ushort id, string msg) {
+        public static void SendMessage(ushort id, string msg) { SendMessage(new ushort[]{ id }, msg); }
+        public static void SendMessage(ushort[] ids, string msg) {
             OpenCheck();
-            if (id == (ushort)SpecialId.Null) {
-                ConsoleServer.WriteLine($"The message \"{msg}\" target no client.", MessageType.Error);
-                return;
-            }
             ConsoleServer.WriteLine(msg);
-            if (id == (ushort)SpecialId.Broadcast) {
-                foreach (ushort clientId in _assignedId) {
-                    Packet packet = new Packet(clientId, "msg");
+            foreach (ushort id in ids) {
+                if (id == (ushort)SpecialId.Null) {
+                    ConsoleServer.WriteLine($"The message \"{msg}\" target no client.", MessageType.Error);
+                    return;
+                }
+                if (id == (ushort)SpecialId.Broadcast) {
+                    foreach (ushort clientId in _assignedId) {
+                        Packet packet = new Packet(clientId, "msg");
+                        packet.Write(msg);
+                        _clients[clientId].SendPacket(packet);
+                    }
+                    return;
+                }
+                if (id != (ushort)SpecialId.Server) {
+                    Packet packet = new Packet(id, "msg");
                     packet.Write(msg);
-                    _clients[clientId].SendPacket(packet);
+                    _clients[id].SendPacket(packet);
+                    return;
+                }
+            }
+        }
+
+        public static void SendPacket(SpecialId id, Packet packet) { SendPacket((ushort)id, packet); }
+        public static void SendPacket(ushort id, Packet packet) {
+            if (id == (ushort)SpecialId.Server) throw new ArgumentException("Can't send a packet to the server : You are the server !");
+            if (id == (ushort)SpecialId.Null) throw new ArgumentNullException("The given id is null.");
+
+            if (id == (ushort)SpecialId.Broadcast) {
+                foreach (ushort assigned in _assignedId) {
+                    if (packet.SenderId == assigned) continue;
+                    _clients[assigned].SendPacket(packet);
                 }
                 return;
             }
-            if (id != (ushort)SpecialId.Server) {
-                Packet packet = new Packet(id, "msg");
-                packet.Write(msg);
-                _clients[id].SendPacket(packet);
-                return;
-            }
+            if (!_assignedId.Contains(id)) throw new ArgumentException($"Can't send a packet to the client {id} : It does not exist.");
+            _clients[id].SendPacket(packet); // Last possibility : sending packet to a specific and existing client.
         }
 
         public static void Ping() {

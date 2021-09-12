@@ -76,8 +76,12 @@ namespace ClientSimple {
         }
 
         public void Ping() {
+            Ping((ushort)SpecialId.Server);
+        }
+
+        public void Ping(ushort id) {
             if (!_stopwatch.IsRunning) {
-                Packet packet = new Packet(SpecialId.Server, "ping");
+                Packet packet = new Packet(id, "ping");
                 SendPacket(packet);
                 _stopwatch.Restart();
             }

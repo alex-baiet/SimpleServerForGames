@@ -31,7 +31,7 @@ namespace ClientSimple {
                 case "idName":
                     ushort id = packet.ReadUshort();
                     string idName = packet.ReadString();
-                    IdHandler.AddIdName(id, idName);
+                    if (!IdHandler.ClientExist(id)) IdHandler.AddIdName(id, idName);
                     ConsoleServer.WriteLine($"{idName} is connected to server with id {id}.", MessageType.Debug);
                     break;
 
@@ -41,8 +41,10 @@ namespace ClientSimple {
                     break;
 
                 case "ping":
-                    toSend = new Packet(SpecialId.Server, "pingReturn");
-                    client.SendPacket(toSend);
+                    if (packet.SenderId == (ushort)SpecialId.Server) {
+                        toSend = new Packet(SpecialId.Server, "pingReturn");
+                        client.SendPacket(toSend);
+                    }
                     break;
 
                 case "pingReturn":

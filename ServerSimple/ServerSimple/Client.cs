@@ -50,8 +50,8 @@ namespace ServerSimple {
 
         public void SendPacket(Packet packet) {
             if (!_tcpClient.Connected) return;
-            if (packet.TargetId != Id) {
-                throw new NotSupportedException("The packet's id must correspond to the client's id.");
+            if (packet.TargetId != Id && packet.TargetId != (ushort)SpecialId.Broadcast && packet.SenderId != Id) {
+                throw new NotSupportedException($"The packet's id ({packet.TargetId}) must correspond to the client's id ({Id}).");
             }
             packet.WriteLength();
             ConsoleServer.WriteLine($"sent packet \"{packet.Name}\" with length : {packet.Length}", MessageType.Packet);
@@ -62,7 +62,7 @@ namespace ServerSimple {
             if (!_stopwatch.IsRunning) {
                 Packet packet = new Packet(Id, "ping");
                 SendPacket(packet);
-                _stopwatch.Start();
+                _stopwatch.Restart();
             }
         }
         #endregion

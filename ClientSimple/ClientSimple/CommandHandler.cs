@@ -36,7 +36,7 @@ namespace ClientSimple {
                         return;
                     }
                     try {
-                        client.SendMessage(IdHandler.NameToId(args[0]), string.Join(" ", args, 1, args.Length - 1));
+                        client.SendMessage(IdHandler.NameToId(args[0]), $"(whisper to {args[0]}) {string.Join(" ", args, 1, args.Length - 1)}");
                     } catch {
                         ConsoleServer.WriteLine("Invalid command.", MessageType.Error);
                     }
@@ -44,8 +44,24 @@ namespace ClientSimple {
                 _commands.Add(command.Name, command);
 
                 command = new Command("ping", (string[] args) => {
-                    ConsoleServer.WriteLine($"Ping sent to server...");
-                    client.Ping();
+                    try {
+                        if (args.Length == 0) {
+                            ConsoleServer.WriteLine($"Ping sent to server...");
+                            client.Ping();
+                        } else if (args.Length == 1) {
+                            if (IdHandler.ClientExist(args[0])) {
+                                ConsoleServer.WriteLine($"Ping sent to {args[0]}...");
+                                client.Ping(IdHandler.NameToId(args[0]));
+                            } else {
+                                ConsoleServer.WriteLine($"The client \"{args[0]}\" does not exist.", MessageType.Error);
+                            }
+                        } else {
+                            ConsoleServer.WriteLine("Too much arguments.", MessageType.Error);
+                        }
+
+                    } catch {
+                        ConsoleServer.WriteLine("Invalid command.", MessageType.Error);
+                    }
                 });
                 _commands.Add(command.Name, command);
 
