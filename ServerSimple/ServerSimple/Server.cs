@@ -84,6 +84,10 @@ namespace ServerSimple {
             _assignedId.Remove(id);
             IdHandler.RemoveIdName(id);
             _connectedCount--;
+
+            packet = new Packet(SpecialId.Broadcast, "clientDisconnect");
+            packet.Write(id);
+            SendPacket(SpecialId.Broadcast, packet);
         }
 
         public static Client GetClient(ushort id) {

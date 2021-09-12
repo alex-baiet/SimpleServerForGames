@@ -7,19 +7,25 @@ using System.Net.Sockets;
 
 namespace ClientSimple {
     class ClientReceive {
+        private static int spamCount = 0;
+
         /// <summary>Treat the packet received depending of his content.</summary>
         /// <param name="packet">The packet received.</param>
         /// <param name="client">The client receiving the packet.</param>
         public static void HandlePacket(Packet packet, Client client) {
-            /*if (packet.TargetId == (ushort)SpecialId.Null) {
-                throw new NotSupportedException("A packet with no target client can't be managed.");
-            }*/
+            ushort id;
 
             switch (packet.Name) {
                 case "allConnectionDataSent": // Connection finished
                     ConsoleServer.WriteLine("Connected successfully to server !", MessageType.Success);
                     Packet toSend = new Packet(SpecialId.Server, "allConnectionDataReceived");
                     client.SendPacket(toSend);
+                    break;
+
+                case "clientDisconnect":
+                    id = packet.ReadUshort();
+                    ConsoleServer.WriteLine($"{IdHandler.IdToName(id)} disconnected.");
+                    IdHandler.RemoveIdName(id);
                     break;
 
                 case "disconnect": // Server closed
@@ -29,7 +35,7 @@ namespace ClientSimple {
                     break;
 
                 case "idName":
-                    ushort id = packet.ReadUshort();
+                    id = packet.ReadUshort();
                     string idName = packet.ReadString();
                     if (!IdHandler.ClientExist(id)) IdHandler.AddIdName(id, idName);
                     ConsoleServer.WriteLine($"{idName} is connected to server with id {id}.", MessageType.Debug);
@@ -49,6 +55,10 @@ namespace ClientSimple {
 
                 case "pingReturn":
                     client.EndPing();
+                    break;
+
+                case "spam":
+                    ConsoleServer.WriteLine($"Spam count : {++spamCount}", MessageType.Debug);
                     break;
 
                 case "yourId":

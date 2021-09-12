@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace ServerSimple {
     class ServerReceive {
+        private static int spamCount = 0;
+
         /// <summary>Treat the packet received depending of his content.</summary>
         public static void HandlePacket(Packet packet, Client client) {
             if (packet.TargetId == (ushort)SpecialId.Null) {
@@ -72,6 +74,10 @@ namespace ServerSimple {
 
                 case "pingReturn":
                     client.EndPing();
+                    break;
+
+                case "spam":
+                    ConsoleServer.WriteLine($"Spam count : {++spamCount}", MessageType.Debug);
                     break;
 
                 default:

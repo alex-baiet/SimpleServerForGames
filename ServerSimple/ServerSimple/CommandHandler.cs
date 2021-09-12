@@ -46,6 +46,23 @@ namespace ServerSimple {
                 });
                 _commands.Add(command.Name, command);
 
+                command = new Command("spam", (string[] args) => {
+                    try {
+                        if (args.Length == 0) {
+                            ConsoleServer.WriteLine($"Missing argument : add the number of spam to send.", MessageType.Error);
+                            return;
+                        }
+                        if (args.Length == 1) {
+                            int count = int.Parse(args[0]);
+                            Packet packet = new Packet(SpecialId.Broadcast, "spam");
+                            for (int i = 0; i < count; i++) { Server.SendPacket(SpecialId.Broadcast, packet); }
+                            return;
+                        }
+                        ConsoleServer.WriteLine("Too much arguments.", MessageType.Error);
+                    } catch (AggregateException) { ConsoleServer.WriteLine("Invalid command.", MessageType.Error); }
+                });
+                _commands.Add(command.Name, command);
+
                 _isInitialized = true;
             } else {
                 throw new NotSupportedException("Can't initialize commands twice.");
