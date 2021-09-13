@@ -17,8 +17,9 @@ namespace ServerSimple {
     class ConsoleServer {
         private const string ReadPrefix = "> ";
 
-        public static bool Debug { get; set; } = true;
-        public static bool ListenPacket { get; set; } = false;
+        public static bool ShowDebug { get; set; } = true;
+        public static bool ShowListenPacket { get; set; } = false;
+        public static bool ShowWarning { get; set; } = true;
 
         private static bool _isReadingLine = false;
 
@@ -28,7 +29,10 @@ namespace ServerSimple {
 
         public static void WriteLine(string msg) { WriteLine(msg, (ConsoleColor)MessageType.Normal); }
         public static void WriteLine(string msg, MessageType color) {
-            if (color == MessageType.Debug && !Debug || color == MessageType.Packet && !ListenPacket) return;
+            if (color == MessageType.Debug && !ShowDebug 
+                || color == MessageType.Packet && !ShowListenPacket
+                || color == MessageType.Warning && !ShowWarning
+                ) return;
             WriteLine(msg, (ConsoleColor)color);
         }
         public static void WriteLine(string msg, ConsoleColor color) {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServerSimple {
     class Database {
-        public static Database Instance = new Database();
+        public static readonly Database Instance = new Database();
         
         public Packet this[ushort id, string name] { 
             get {

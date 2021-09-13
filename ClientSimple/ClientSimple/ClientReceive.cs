@@ -67,7 +67,8 @@ namespace ClientSimple {
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    ConsoleServer.WriteLine($"The received packet \"{packet.Name}\" is not supported.", MessageType.Warning);
+                    break;
             }
         }
 

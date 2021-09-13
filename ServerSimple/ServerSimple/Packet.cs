@@ -18,12 +18,30 @@ namespace ServerSimple {
         /// <summary>Gets the length of the unread data contained in the packet.</summary>
         public int UnreadLength { get => Length - readPos; }
         /// <summary>The sender's id.</summary>
-        public ushort SenderId { get; private set; } = (ushort)SpecialId.Null;
+        public ushort SenderId { 
+            get => _senderId;
+            set {
+                byte[] bytes = BitConverter.GetBytes(value);
+                int startIndex = _lengthWrote ? 4 : 0;
+                for (int i = 0; i < bytes.Length; i++) { buffer[startIndex + i] = bytes[i]; }
+                _senderId = value;
+            }
+        }
         /// <summary>The target client's id.</summary>
-        public ushort TargetId { get; private set; } = (ushort)SpecialId.Null;
+        public ushort TargetId { 
+            get => _targetId;
+            set {
+                byte[] bytes = BitConverter.GetBytes(value);
+                int startIndex = 2 + (_lengthWrote ? 4 : 0);
+                for (int i = 0; i < bytes.Length; i++) { buffer[startIndex + i] = bytes[i]; }
+                _targetId = value;
+            }
+        }
         /// <summary>The name given to the packet.</summary>
         public string Name { get; private set; }
 
+        private ushort _senderId = (ushort)SpecialId.Null;
+        private ushort _targetId = (ushort)SpecialId.Null;
         private List<byte> buffer;
         private byte[] readableBuffer;
         private int readPos;
@@ -51,8 +69,8 @@ namespace ServerSimple {
             buffer = new List<byte>();
             readPos = 0;
 
-            SenderId = senderId;
-            TargetId = targetId;
+            _senderId = senderId;
+            _targetId = targetId;
             Name = name;
 
             Write(SenderId);
@@ -70,12 +88,12 @@ namespace ServerSimple {
                 SetBytes(data);
 
                 ReadInt(); // Read the useless length value from data.
-                SenderId = ReadUshort();
-                TargetId = ReadUshort();
+                _senderId = ReadUshort();
+                _targetId = ReadUshort();
                 Name = ReadString();
             } else {
                 // It's a packet of disconnection.
-                TargetId = (int)SpecialId.Server;
+                _targetId = (int)SpecialId.Server;
                 Name = "disconnect";
             }
             _lengthWrote = true;

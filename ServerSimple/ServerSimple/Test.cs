@@ -9,7 +9,7 @@ using System.Net;
 namespace ServerSimple {
     class Test {
         public static void Start() {
-            /*ConsoleServer.WriteLine("TEST");
+            ConsoleServer.WriteLine("TEST");
             Database db = Database.Instance;
             Packet original = new Packet((ushort)SpecialId.Server, (ushort)SpecialId.Broadcast, "potato");
             original.Write(10);
@@ -24,7 +24,14 @@ namespace ServerSimple {
             ConsoleServer.WriteLine($"found 2 : {db.TryGet((ushort)SpecialId.Server, "nfofoes", out _)}");
             ConsoleServer.WriteLine($"found 3 : {db.TryGet(42, "potato", out _)}");
 
-            ConsoleServer.WriteLine("FIN TEST");*/
+            ConsoleServer.WriteLine("TEST 2");
+            ConsoleServer.WriteLine($"array 1 : {Helper.ArrayToString(original.ToArray())}");
+            original.TargetId = 1;
+            ConsoleServer.WriteLine($"array 2 : {Helper.ArrayToString(original.ToArray())}");
+            original.SenderId = 1;
+            ConsoleServer.WriteLine($"array 3 : {Helper.ArrayToString(original.ToArray())}");
+
+            ConsoleServer.WriteLine("FIN TEST");
         }
     }
 }
