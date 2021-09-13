@@ -80,6 +80,9 @@ namespace ServerSimple {
             }
             _lengthWrote = true;
         }
+
+        /// <summary>Copy constructor.</summary>
+        public Packet(Packet packet) : this(packet.buffer.ToArray()) { }
         #endregion
 
         #region Functions
