@@ -58,6 +58,11 @@ namespace ClientSimple {
         #endregion
 
         #region Sending
+        /*public void Query(ushort id, string name) {
+            Packet packet = new Packet(SpecialId.Server, "query");
+            packet.Write(id);
+        }*/
+
         public void SendMessage(SpecialId toClientId, string msg) { SendMessage((ushort)toClientId, msg); }
         public void SendMessage(ushort toClientId, string msg) {
             Packet packet = new Packet(toClientId, "msg");

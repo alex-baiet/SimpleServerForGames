@@ -128,25 +128,50 @@ namespace ServerSimple {
 
         #region Write Data
         /// <summary>Adds a byte to the packet.</summary>
-        public void Write(byte value) { buffer.Add(value); }
+        public Packet Write(byte value) {
+            buffer.Add(value);
+            return this;
+        }
         /// <summary>Adds an array of bytes to the packet.</summary>
-        public void Write(byte[] value) { buffer.AddRange(value); }
+        public Packet Write(byte[] value) {
+            buffer.AddRange(value);
+            return this;
+        }
         /// <summary>Adds a short to the packet.</summary>
-        public void Write(short value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(short value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds a short to the packet.</summary>
-        public void Write(ushort value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(ushort value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds an int to the packet.</summary>
-        public void Write(int value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(int value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds a long to the packet.</summary>
-        public void Write(long value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(long value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds a float to the packet.</summary>
-        public void Write(float value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(float value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds a bool to the packet.</summary>
-        public void Write(bool value) { buffer.AddRange(BitConverter.GetBytes(value)); }
+        public Packet Write(bool value) {
+            buffer.AddRange(BitConverter.GetBytes(value));
+            return this;
+        }
         /// <summary>Adds a string to the packet.</summary>
-        public void Write(string value) {
+        public Packet Write(string value) {
             Write(value.Length); // Add the length of the string to the packet
             buffer.AddRange(Encoding.ASCII.GetBytes(value)); // Add the string itself
+            return this;
         }
         #endregion
 
