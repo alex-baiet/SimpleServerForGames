@@ -9,12 +9,13 @@ namespace ServerSimple {
         public delegate void CommandAction(string[] args);
 
         public string Name { get; private set; }
-
+        public string Description { get; private set; }
 
         private CommandAction _action;
 
-        public Command(string name, CommandAction action) {
+        public Command(string name, string description, CommandAction action) {
             Name = name;
+            Description = description;
             _action = action;
         }
 

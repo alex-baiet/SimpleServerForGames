@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerSimple {
+    /// <summary>Contains packets sends by clients</summary>
     class Database {
         public static readonly Database Instance = new Database();
         
@@ -31,6 +32,7 @@ namespace ServerSimple {
             else database[id][name] = packet;
         }
 
+        /// <summary>Return the contained packet, or false if it does not exist.</summary>
         public bool TryGet(ushort id, string name, out Packet packet) {
             try {
                 packet = this[id, name];

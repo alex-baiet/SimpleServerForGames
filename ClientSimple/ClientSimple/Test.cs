@@ -18,12 +18,12 @@ namespace ClientSimple {
             Array.Copy(words, 1, args, 0, args.Length);
             ConsoleServer.WriteLine($"args found : {Helper.ArrayToString(args)}");*/
 
-            Thread threadTest = new Thread(new ThreadStart(() => {
+            /*Thread threadTest = new Thread(new ThreadStart(() => {
                 Thread.Sleep(5000);
                 client.Query(SpecialId.Server, "potato");
                 client.Query(SpecialId.Server, "bl");
             }));
-            threadTest.Start();
+            threadTest.Start();*/
         }
     }
 }

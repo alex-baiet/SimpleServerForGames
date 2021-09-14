@@ -48,6 +48,7 @@ namespace ServerSimple {
             ConsoleServer.WriteLine($"Message sent to {Pseudo}.", MessageType.Debug);
         }
 
+        /// <summary></summary>
         public void SendPacket(Packet packet) {
             if (!_tcpClient.Connected) return;
             if (packet.TargetId != Id && packet.TargetId != (ushort)SpecialId.Broadcast && packet.SenderId != Id) {

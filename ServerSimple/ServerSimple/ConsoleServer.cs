@@ -22,6 +22,7 @@ namespace ServerSimple {
         public static bool ShowWarning { get; set; } = true;
 
         private static bool _isReadingLine = false;
+        private static object writer = new object();
 
         public static string ToMessageFormat(string pseudo, string msg) {
             return $"[{pseudo}] {msg}";
@@ -36,18 +37,22 @@ namespace ServerSimple {
             WriteLine(msg, (ConsoleColor)color);
         }
         public static void WriteLine(string msg, ConsoleColor color) {
-            if (_isReadingLine) RemoveCharacters(ReadPrefix.Length);
+            lock (writer) {
+                if (_isReadingLine) RemoveCharacters(ReadPrefix.Length);
 
-            Console.ForegroundColor = color;
-            Console.WriteLine(msg);
-            Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = color;
+                Console.WriteLine(msg);
+                Console.ForegroundColor = ConsoleColor.White;
 
-            if (_isReadingLine) Console.Write(ReadPrefix);
+                if (_isReadingLine) Console.Write(ReadPrefix);
+            }
         }
 
         public static string ReadLine() {
-            _isReadingLine = true;
-            Console.Write(ReadPrefix);
+            lock (writer) {
+                _isReadingLine = true;
+                Console.Write(ReadPrefix);
+            }
             string res = Console.ReadLine();
             _isReadingLine = false;
             return res;
