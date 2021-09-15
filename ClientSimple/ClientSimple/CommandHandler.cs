@@ -142,14 +142,14 @@ namespace ClientSimple {
         /// <returns>True if the command exist.</returns>
         public static bool ExecuteCommand(string command) {
             if (!_isInitialized) InitCommand();
-            
+
             string[] words = command.Split(' ');
+            string commandName = words[0].ToLower();
             string[] args = new string[words.Length - 1];
             Array.Copy(words, 1, args, 0, args.Length);
 
-            if (_commands.ContainsKey(words[0])) {
-                try { _commands[words[0]].Execute(args); }
-                catch { ConsoleServer.WriteLine($"An unknown error occured with the command \"{command}\".", MessageType.Error); }
+            if (_commands.ContainsKey(commandName)) {
+                try { _commands[commandName].Execute(args); } catch { ConsoleServer.WriteLine($"An unknown error occured with the command \"{command}\".", MessageType.Error); }
                 return true;
             }
 
