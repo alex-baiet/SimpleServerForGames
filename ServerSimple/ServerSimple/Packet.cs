@@ -10,6 +10,8 @@ namespace ServerSimple {
         Null = ushort.MaxValue - 1
     }
 
+    /// <summary>Used to read and send data through clients and the server</summary>
+    /// <remarks>This class is identical in client and server script</remarks>
     public class Packet {
         #region Variables
         /// <summary>Gets the length of the packet's content.</summary>

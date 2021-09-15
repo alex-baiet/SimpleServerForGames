@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerSimple {
+    /// <summary>Handle received data and do action depending of the data.</summary>
     class ServerReceive {
         private static int spamCount = 0;
         private static Database db = Database.Instance;

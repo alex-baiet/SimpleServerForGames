@@ -3,25 +3,47 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace ClientSimple {
+    /// <summary>Enumeration of reserved id.</summary>
     public enum SpecialId {
         Server = 0,
         Broadcast = ushort.MaxValue,
-        Null = ushort.MaxValue-1
+        Null = ushort.MaxValue - 1
     }
 
+    /// <summary>Used to read and send data through clients and the server</summary>
+    /// <remarks>This class is identical in client and server script</remarks>
     public class Packet {
         #region Variables
         /// <summary>Gets the length of the packet's content.</summary>
         public int Length { get => buffer.Count; }
+
         /// <summary>Gets the length of the unread data contained in the packet.</summary>
         public int UnreadLength { get => Length - readPos; }
         /// <summary>The sender's id.</summary>
-        public ushort SenderId { get; private set; } = (int)SpecialId.Null;
+        public ushort SenderId {
+            get => _senderId;
+            set {
+                byte[] bytes = BitConverter.GetBytes(value);
+                int startIndex = _lengthWrote ? 4 : 0;
+                for (int i = 0; i < bytes.Length; i++) { buffer[startIndex + i] = bytes[i]; }
+                _senderId = value;
+            }
+        }
         /// <summary>The target client's id.</summary>
-        public ushort TargetId { get; private set; } = (int)SpecialId.Null;
+        public ushort TargetId {
+            get => _targetId;
+            set {
+                byte[] bytes = BitConverter.GetBytes(value);
+                int startIndex = 2 + (_lengthWrote ? 4 : 0);
+                for (int i = 0; i < bytes.Length; i++) { buffer[startIndex + i] = bytes[i]; }
+                _targetId = value;
+            }
+        }
         /// <summary>The name given to the packet.</summary>
         public string Name { get; private set; }
 
+        private ushort _senderId = (ushort)SpecialId.Null;
+        private ushort _targetId = (ushort)SpecialId.Null;
         private List<byte> buffer;
         private byte[] readableBuffer;
         private int readPos;
@@ -42,12 +64,15 @@ namespace ClientSimple {
         public Packet(SpecialId id, string name) : this((ushort)id, name) { }
 
         /// <summary>Creates a new packet with a given ID and name. Used for sending.</summary>
-        public Packet(ushort id, string name) {
+        public Packet(ushort targetId, string name) : this((ushort)SpecialId.Server, targetId, name) { }
+
+        /// <summary>Creates a new packet with a given ID and name. Used for sending.</summary>
+        public Packet(ushort senderId, ushort targetId, string name) {
             buffer = new List<byte>();
             readPos = 0;
 
-            SenderId = Client.Instance.Id;
-            TargetId = id;
+            _senderId = senderId;
+            _targetId = targetId;
             Name = name;
 
             Write(SenderId);
@@ -65,16 +90,19 @@ namespace ClientSimple {
                 SetBytes(data);
 
                 ReadInt(); // Read the useless length value from data.
-                SenderId = ReadUshort();
-                TargetId = ReadUshort();
+                _senderId = ReadUshort();
+                _targetId = ReadUshort();
                 Name = ReadString();
             } else {
                 // It's a packet of disconnection.
-                TargetId = (int)SpecialId.Server;
+                _targetId = (int)SpecialId.Server;
                 Name = "disconnect";
             }
             _lengthWrote = true;
         }
+
+        /// <summary>Copy constructor.</summary>
+        public Packet(Packet packet) : this(packet.buffer.ToArray()) { }
         #endregion
 
         #region Functions
@@ -120,7 +148,7 @@ namespace ClientSimple {
 
         #region Write Data
         /// <summary>Adds a byte to the packet.</summary>
-        public Packet Write(byte value) { 
+        public Packet Write(byte value) {
             buffer.Add(value);
             return this;
         }

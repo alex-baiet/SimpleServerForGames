@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 
 namespace ClientSimple {
+    /// <summary>Used to communicate with the server.</summary>
     class Client {
         public const int BufferSize = 4096;
         public static Client Instance = new Client();
@@ -34,11 +35,14 @@ namespace ClientSimple {
             _tcpClient.BeginConnect(ip, port, new AsyncCallback(ConnectCallback), _tcpClient);
         }
 
+        /// <summary>Disconnect the client.</summary>
         public void Disconnect() {
             _tcpClient.Close();
             Connected = false;
+        /// <summary>Disconnect the client.</summary>
         }
 
+        /// <summary>Called when ending the connection to the server.</summary>
         private void ConnectCallback(IAsyncResult res) {
             if (_tcpClient.Connected) {
                 ConsoleServer.WriteLine("Connection to server establish. Waiting for datas...", MessageType.Normal);
@@ -58,14 +62,21 @@ namespace ClientSimple {
         #endregion
 
         #region Sending
+        /// <summary>Ask for an information to the server.</summary>
         public void Query(SpecialId id, string name) { Query((ushort)id, name); }
+        /// <summary>Ask for an information to the server.</summary>
         public void Query(ushort id, string name) {
             Packet packet = new Packet(SpecialId.Server, "query");
             packet.Write(id).Write(name);
             SendPacket(packet);
+        /// <summary>Ask for an information to the server.</summary>
         }
 
+        /// <summary>Send a message to the distant connection.</summary>
+        /// <remarks>The message is just a "msg" packet.</remarks>
         public void SendMessage(SpecialId toClientId, string msg) { SendMessage((ushort)toClientId, msg); }
+        /// <summary>Send a message to the distant connection.</summary>
+        /// <remarks>The message is just a "msg" packet.</remarks>
         public void SendMessage(ushort toClientId, string msg) {
             Packet packet = new Packet(toClientId, "msg");
             packet.Write(ConsoleServer.ToMessageFormat(Pseudo, msg));
@@ -74,6 +85,7 @@ namespace ClientSimple {
             ConsoleServer.WriteLine($"Message sent to {IdHandler.IdToName(toClientId)}.", MessageType.Debug);
         }
         
+        /// <summary>Send a packet to the distant connection.</summary>
         public void SendPacket(Packet packet) {
             try {
                 packet.WriteLength();
@@ -82,10 +94,14 @@ namespace ClientSimple {
             } catch (ObjectDisposedException) { }
         }
 
+        /// <summary>Send a ping to the server.</summary>
+        /// <remarks>The ping is just a "ping" packet.</remarks>
         public void Ping() {
             Ping((ushort)SpecialId.Server);
         }
 
+        /// <summary>Send a ping to the specified client.</summary>
+        /// <remarks>The ping is just a "ping" packet.</remarks>
         public void Ping(ushort id) {
             if (!_stopwatch.IsRunning) {
                 Packet packet = new Packet(id, "ping");
@@ -96,6 +112,7 @@ namespace ClientSimple {
         #endregion
 
         #region Receiving
+        /// <summary>Called when a packet is received.</summary>
         private void ReceiveCallback(IAsyncResult res) {
             try {
                 int byteLength = _stream.EndRead(res);

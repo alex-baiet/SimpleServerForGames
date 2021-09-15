@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 
 namespace ClientSimple {
+    /// <summary>Manage text entered in the console.</summary>
     class InputHandler {
         /// <summary>Start reading lines entered by the user.</summary>
         public static void StartReadLines() {

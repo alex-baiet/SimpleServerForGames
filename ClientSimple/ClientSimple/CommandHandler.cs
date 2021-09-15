@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientSimple {
+    /// <summary>Manage commands.</summary>
     class CommandHandler {
         public static string[] CommandsList { get => _commands.Keys.ToArray(); }
         
@@ -71,7 +72,7 @@ namespace ClientSimple {
                             return;
                         }
                         if (!IdHandler.ClientExist(args[0])) {
-                            ConsoleServer.WriteLine($"\"{args[0]}\" does not exist.", MessageType.Error);
+                            ConsoleServer.WriteLine($"The client \"{args[0]}\" does not exist.", MessageType.Error);
                             return;
                         }
                         client.SendMessage(

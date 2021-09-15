@@ -5,11 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientSimple {
+    /// <summary>Used to create Packet from received data</summary>
+    /// <remarks>This class is identical in client and server script</remarks>
     class PacketManager {
         private byte[] _dataPart;
 
+        /// <summary>Return the different packets contained in the data.</summary>
         public Packet[] GetPackets(byte[] data) {
             List<Packet> packets = new List<Packet>();
+            if (data.Length == 0) {
+                packets.Add(new Packet(SpecialId.Server, "disconnect"));
+                return packets.ToArray();
+            }
 
             int cursor = 0;
             if (_dataPart != null) {
@@ -57,6 +64,8 @@ namespace ClientSimple {
             return packets.ToArray();
         }
 
+        /// <summary>Store the left data who is not enough to create a packet,
+        /// to finish creating the packet at the next reception.</summary>
         private void StoreLeftData(byte[] data, int cursor) {
             int sizeLeft = data.Length - cursor;
             _dataPart = new byte[sizeLeft];

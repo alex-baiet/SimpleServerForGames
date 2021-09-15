@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerSimple {
+    /// <remarks>This class is identical in client and server script</remarks>
     class IdHandler {
         #region Variables
         private static Dictionary<ushort, string> _idNames = new Dictionary<ushort, string>() {
@@ -19,10 +20,14 @@ namespace ServerSimple {
         #endregion
 
         #region Functions
+        /// <summary>Test to know if the Client with a specific attribut exist.</summary>
         public static bool ClientExist(string name) { return _namesId.ContainsKey(name); }
+        /// <summary>Test to know if the Client with a specific attribut exist.</summary>
         public static bool ClientExist(ushort id) { return _idNames.ContainsKey(id); }
 
+        /// <summary>Give the name of the client from his id.</summary>
         public static string IdToName(ushort id) { return _idNames[id]; }
+        /// <summary>Give the id of the client from his name.</summary>
         public static ushort NameToId(string name) { return _namesId[name]; }
 
         /// <summary>Add a pair of id and name, and return false if a client with similar name already exist.</summary>
@@ -35,12 +40,14 @@ namespace ServerSimple {
             return true;
         }
 
+        /// <summary>Remove a pair of id and name.</summary>
         public static void RemoveIdName(ushort id) {
             if (_idNames.ContainsKey(id)) {
                 _namesId.Remove(_idNames[id]);
                 _idNames.Remove(id);
             }
         }
+        /// <summary>Remove a pair of id and name.</summary>
         public static void RemoveIdName(string name) {
             if (_namesId.ContainsKey(name)) {
                 _idNames.Remove(_namesId[name]);

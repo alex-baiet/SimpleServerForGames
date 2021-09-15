@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Diagnostics;
 
 namespace ServerSimple {
+    /// <summary>Used to communicate with distant clients.</summary>
     class Client {
         public const int BufferSize = 4096;
 
@@ -32,7 +33,7 @@ namespace ServerSimple {
         }
 
         #region Connection
-        /// <summary></summary>
+        /// <summary>Disconnect the client.</summary>
         /// <remarks>Must close the host point before closing the server's client.</remarks>
         public void Disconnect() {
             _tcpClient.Close();
@@ -40,6 +41,8 @@ namespace ServerSimple {
         #endregion
 
         #region Sending
+        /// <summary>Send a message to the distant connection.</summary>
+        /// <remarks>The message is just a "msg" packet.</remarks>
         public void SendMessage(string msg) {
             Packet packet = new Packet(Id, "msg");
             packet.Write(ConsoleServer.ToMessageFormat(Server.Name, msg));
@@ -48,7 +51,7 @@ namespace ServerSimple {
             ConsoleServer.WriteLine($"Message sent to {Pseudo}.", MessageType.Debug);
         }
 
-        /// <summary></summary>
+        /// <summary>Send a packet to the distant connection.</summary>
         public void SendPacket(Packet packet) {
             if (!_tcpClient.Connected) return;
             if (packet.TargetId != Id && packet.TargetId != (ushort)SpecialId.Broadcast && packet.SenderId != Id) {
@@ -59,6 +62,8 @@ namespace ServerSimple {
             _stream.BeginWrite(packet.ToArray(), 0, packet.Length, null, null);
         }
 
+        /// <summary>Send a ping to the distant connection.</summary>
+        /// <remarks>The ping is just a "ping" packet.</remarks>
         public void Ping() {
             if (!_stopwatch.IsRunning) {
                 Packet packet = new Packet(Id, "ping");
@@ -69,6 +74,7 @@ namespace ServerSimple {
         #endregion
 
         #region Receiving
+        /// <summary>Called when a packet is received.</summary>
         private void ReceiveCallback(IAsyncResult res) {
             try {
                 int byteLength = _stream.EndRead(res);

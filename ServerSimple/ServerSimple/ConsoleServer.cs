@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerSimple {
+    /// <remarks>This class is identical in client and server script</remarks>
     enum MessageType {
         Normal = ConsoleColor.White,
         Warning = ConsoleColor.Yellow,
@@ -14,21 +15,29 @@ namespace ServerSimple {
         Packet = ConsoleColor.DarkMagenta
     }
 
+    /// <summary>Write in console with a better look aspect than <see cref="Console"/>.</summary>
+    /// <remarks>This class is identical in client and server script</remarks>
     class ConsoleServer {
         private const string ReadPrefix = "> ";
 
+        /// <summary>Display or not debug message.</summary>
         public static bool ShowDebug { get; set; } = true;
+        /// <summary>Display or not packet message.</summary>
         public static bool ShowListenPacket { get; set; } = false;
+        /// <summary>Display or not warning message.</summary>
         public static bool ShowWarning { get; set; } = true;
 
         private static bool _isReadingLine = false;
         private static object writer = new object();
 
+        /// <summary>Use parameter to create a message format text.</summary>
         public static string ToMessageFormat(string pseudo, string msg) {
             return $"[{pseudo}] {msg}";
         }
 
+        /// <summary>Write a line, using whire color.</summary>
         public static void WriteLine(string msg) { WriteLine(msg, (ConsoleColor)MessageType.Normal); }
+        /// <summary>Write a line, using colors.</summary>
         public static void WriteLine(string msg, MessageType color) {
             if (color == MessageType.Debug && !ShowDebug 
                 || color == MessageType.Packet && !ShowListenPacket
@@ -36,6 +45,7 @@ namespace ServerSimple {
                 ) return;
             WriteLine(msg, (ConsoleColor)color);
         }
+        /// <summary>Write a line, using colors.</summary>
         public static void WriteLine(string msg, ConsoleColor color) {
             lock (writer) {
                 if (_isReadingLine) RemoveCharacters(ReadPrefix.Length);
@@ -48,6 +58,7 @@ namespace ServerSimple {
             }
         }
 
+        /// <summary>Better way to read a line.</summary>
         public static string ReadLine() {
             lock (writer) {
                 _isReadingLine = true;
@@ -58,7 +69,8 @@ namespace ServerSimple {
             return res;
         }
 
-        public static void RemoveCharacters(int count) {
+        /// <summary>Remove prefix reading characters.</summary>
+        private static void RemoveCharacters(int count) {
             for (int i = 0; i < count; i++) Console.Write("\b \b");
         }
     }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 
 namespace ServerSimple {
+    /// <summary>The server, managing all clients, connection, etc.</summary>
     class Server {
         public const int Port = 26950;
         public const ushort MaxClient = 4;
@@ -17,6 +18,7 @@ namespace ServerSimple {
         private static int _connectedCount = 0;
         private static HashSet<ushort> _assignedId = new HashSet<ushort>();
 
+        /// <summary>Start the server, beginning to listen to entering connection.</summary>
         public static void Start() {
             ConsoleServer.WriteLine($"Starting server...");
 
@@ -28,6 +30,7 @@ namespace ServerSimple {
             ConsoleServer.WriteLine($"Server started on port {Port} !", MessageType.Success);
         }
 
+        /// <summary>Stop the server, disconnecting all clients.</summary>
         public static void Stop() {
             HashSet<ushort> copy = new HashSet<ushort>(_assignedId);
             foreach (ushort id in copy) {
@@ -37,6 +40,7 @@ namespace ServerSimple {
             IsOpen = false;
         }
 
+        /// <summary>Called when a distant connexion try to connect to the server.</summary>
         private static void ConnectCallback(IAsyncResult res) {
             try {
                 TcpClient tcpClient = _tcpListener.EndAcceptTcpClient(res);
@@ -59,6 +63,7 @@ namespace ServerSimple {
             } catch (ObjectDisposedException) { }
         }
 
+        /// <summary>Add a client to the server.</summary>
         private static void AddClient(TcpClient tcpClient) {
             OpenCheck();
             for (ushort i = 1; i <= MaxClient; i++) {
@@ -71,6 +76,7 @@ namespace ServerSimple {
             }
         }
 
+        /// <summary>Remove and disconnect a client from the server</summary>
         public static void RemoveClient(ushort id, string msg) {
             OpenCheck();
             Client client = _clients[id];
@@ -94,8 +100,11 @@ namespace ServerSimple {
             return _clients[id];
         }
 
+        /// <summary>Send a message to a client.</summary>
         public static void SendMessage(SpecialId id, string msg) { SendMessage((ushort)id, msg); }
+        /// <summary>Send a message to a client.</summary>
         public static void SendMessage(ushort id, string msg) { SendMessage(new ushort[]{ id }, msg); }
+        /// <summary>Send a message to a client.</summary>
         public static void SendMessage(ushort[] ids, string msg) {
             OpenCheck();
             ConsoleServer.WriteLine(msg);
@@ -121,7 +130,9 @@ namespace ServerSimple {
             }
         }
 
+        /// <summary>Send a packet to a client.</summary>
         public static void SendPacket(SpecialId id, Packet packet) { SendPacket((ushort)id, packet); }
+        /// <summary>Send a packet to a client.</summary>
         public static void SendPacket(ushort id, Packet packet) {
             if (id == (ushort)SpecialId.Server) throw new ArgumentException("Can't send a packet to the server : You are the server !");
             if (id == (ushort)SpecialId.Null) throw new ArgumentNullException("The given id is null.");
@@ -137,6 +148,7 @@ namespace ServerSimple {
             _clients[id].SendPacket(packet); // Last possibility : sending packet to a specific and existing client.
         }
 
+        /// <summary>Ping all clients.</summary>
         public static void Ping() {
             OpenCheck();
             foreach (int id in _assignedId) {
@@ -144,6 +156,7 @@ namespace ServerSimple {
             }
         }
 
+        /// <summary>Test if the server is open.</summary>
         private static void OpenCheck() {
             if (!IsOpen) throw new NotSupportedException("The server must be open.");
         }

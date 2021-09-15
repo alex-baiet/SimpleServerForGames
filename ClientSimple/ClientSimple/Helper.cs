@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientSimple {
+    /// <remarks>This class is identical in client and server script</remarks>
     class Helper {
-        public static string ArrayToString(object[] array) {
+        /// <summary>Return a string representing the given array.</summary>
+        public static string ArrayToString<T>(T[] array) {
             if (array.Length == 0) return "[]";
 
             string res = "[";
@@ -17,6 +19,7 @@ namespace ClientSimple {
             return res;
         }
 
+        /// <summary>Return a string representing the given array.</summary>
         public static string ArrayToString(Dictionary<int, string> array) {
             string res = "[";
             foreach (KeyValuePair<int, string> pair in array) {

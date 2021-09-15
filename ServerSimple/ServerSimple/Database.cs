@@ -25,6 +25,8 @@ namespace ServerSimple {
         /// <summary>Add the packet in the database.</summary>
         /// <remarks>If a packet with the same index exist, it will be override.</remarks>
         public void Set(Packet packet) { Set(packet.SenderId, packet.Name, packet); }
+        /// <summary>Add the packet in the database.</summary>
+        /// <remarks>If a packet with the same index exist, it will be override.</remarks>
         public void Set(ushort id, string name, Packet packet) {
             packet.WriteLength();
             if (!database.ContainsKey(id)) database.Add(id, new Dictionary<string, Packet>());
